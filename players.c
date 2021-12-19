@@ -1,24 +1,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int Mode(){
-  int mode;
+int Gameplay(){
+  int gameplay;
   printf("Choose mode:\nPlayer VS Player: 1");
   printf("\nPlayer VS Computer: 2");
-  printf("\nFor multiple players (maximum 4 players): 3");
-  scanf("%d", &mode);
+  printf("\nFor multiple players (maximum 4 players): 3\n");
+  scanf("%d", &gameplay);
   
-  while(mode != 1 || mode != 2 || mode != 3){
+  while(gameplay != 1 || gameplay != 2 || gameplay != 3){
     printf("Enter a valid number that represents meaningful mode :)");
-    scanf("%c", &mode);
+    scanf("%c", &gameplay);
   }
-  return mode;
+  return gameplay;
 }
 
 
 int main() {
   
-  int mode = Mode();
+  int gameplay = Gameplay();
   
     return 0;
 }
