@@ -14,6 +14,8 @@
 #define  cyan "\x1b[36m"
 #define  white "\x1b[37m"
 
+#define FOREGROUND_WHITE FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY
+
 /*
 void printgrid(int n, int m){
 
@@ -143,10 +145,10 @@ int game(char x) {
         for(int j = 0; j < 2*m+1; j++){
 
             grid[i][j] = ' ';
-            colorsgrid[i][j] = FOREGROUND_GREEN ;
+            colorsgrid[i][j] = FOREGROUND_WHITE ;
 
         }
-}
+    }
 
 
     // making the grid
@@ -210,7 +212,7 @@ int game(char x) {
   // --------------------------------------- starting the game -----------------------
   //whenever maxmoves is reached game is over
   int maxmoves =  m*(n+1) + n*(m+1);
-  int scores[2] = {};
+  int scores[2] = {0, 23};
   int moves[2] = {};
   int colors[2] = {FOREGROUND_BLUE, FOREGROUND_RED};
   int totalmoves = 0;
@@ -235,7 +237,7 @@ int game(char x) {
                     SetConsoleTextAttribute(hOut, colorsgrid[i][j]); //The font is set to it's assigned color in my array colorsgrid
 
                     printf(" %c ", grid[i][j]);
-                    SetConsoleTextAttribute(hOut, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+                    SetConsoleTextAttribute(hOut, FOREGROUND_WHITE);
                 }
 
                 printf("\n");
@@ -268,6 +270,18 @@ int game(char x) {
 
     col1 = lineD.point1.col;
     col2 = lineD.point2.col;
+
+
+    int row = 0, col = 0; // only for painting the chosen line
+
+    // changing the right point on grid
+    // if it's horizontal line
+    if(col1 < col2){row = 2*row1-2, col = 2*col1-1;}
+    else if(col1 > col2){row = 2*row1-2, col = 2*col2-1;}
+    // if it's vertical line
+    if(row1 < row2){row = 2*row1-1, col = 2*col1-2;}
+    else if(row1 > row2){row = 2*row2-1, col = 2*col1-2;}
+
 
     struct line linesArry[100];
     //linesArry[totalmoves] = lineD;
@@ -333,6 +347,7 @@ int game(char x) {
                 grid[2*row2-1][2*col1-2] = 186;
                 colorsgrid[2*row2-1][2*col1-2] = colors[totalmoves%2];}
 
+
         moves[totalmoves%2]++; // number of moves increase for the player 1 or 2
         totalmoves++;
         system("cls");
@@ -352,21 +367,11 @@ int game(char x) {
                 printf("                                ");
                 for(int j = 0; j < 2*m+1; j++){
 
-                    int row = 0, col = 0; // only for painting the chosen line
-
-                    // changing the right point on grid
-                    // if it's horizontal line
-                    if(col1 < col2) row = 2*row1-2, col = 2*col1-1;
-                    else if(col1 > col2) row = 2*row1-2, col = 2*col2-1;
-                    // if it's vertical line
-                    if(row1 < row2) row = 2*row1-1, col = 2*col1-2;
-                    else if(row1 > row2) row = 2*row2-1, col = 2*col1-2;
-
                     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE); // Gets the standard output handle
                     SetConsoleTextAttribute(hOut, colorsgrid[i][j]); //The font is set to it's assigned color in my array colorsgrid
 
                     printf(" %c ", grid[i][j]);
-                    SetConsoleTextAttribute(hOut, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+                    SetConsoleTextAttribute(hOut, FOREGROUND_WHITE);
 
                 }
 
@@ -378,6 +383,7 @@ int game(char x) {
         print_board(scores, moves);
 
     }
+
 
     // is line chosen ?
     /*

@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1640294527 source:e:\education\college\programming\final project\test\test\main.c
+1640294655 source:e:\education\college\programming\final project\test\test\main.c
 	<stdio.h>
 	<stdlib.h>
 	<windows.h>
@@ -8,7 +8,7 @@
 1640294448 e:\education\college\programming\final project\test\test\playing.h
 	"playing.c"
 
-1640294553 e:\education\college\programming\final project\test\test\playing.c
+1640297812 e:\education\college\programming\final project\test\test\playing.c
 	<stdio.h>
 	<stdlib.h>
 	<windows.h>
