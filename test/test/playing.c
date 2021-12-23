@@ -103,12 +103,12 @@ struct line getLine(){
 
 
 
-int main() {
+int game(char x) {
 
   system("");//for enabling colors
 
   int n, m;
-  char x = 'b';
+
     switch(x){
 
       case 'b':n = 2; m = 2;break;  // Beginners get 2 X 2 grid
