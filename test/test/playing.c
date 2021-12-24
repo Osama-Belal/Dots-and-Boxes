@@ -212,9 +212,10 @@ int game(char x) {
   // --------------------------------------- starting the game -----------------------
   //whenever maxmoves is reached game is over
   int maxmoves =  m*(n+1) + n*(m+1);
-  int scores[2] = {0, 23};
+  int scores[2] = {0, 0}, boxClosed = 0;
   int moves[2] = {};
   int colors[2] = {FOREGROUND_BLUE, FOREGROUND_RED};
+  int backcolors[2] = {BACKGROUND_BLUE, BACKGROUND_RED};
   int totalmoves = 0;
   int row1 = 0, row2 = 0, col1 = 0, col2 = 0;
   int valid_choice = 0, withinlimits = 1, lineAvlbe = 1;
@@ -250,7 +251,7 @@ int game(char x) {
 
   while(totalmoves < maxmoves){
 
-    valid_choice = 0;
+    valid_choice = 0;boxClosed = 0;
     printf(green "  Player %d's turn \n" reset, (totalmoves%2)+1);
 /*
     printf(yellow "  Row: ");
@@ -284,7 +285,7 @@ int game(char x) {
 
 
     struct line linesArry[100];
-    //linesArry[totalmoves] = lineD;
+    linesArry[totalmoves] = lineD;
 
     int rowdiff = abs(row1 - row2);
     int coldiff = abs(col1 - col2);
@@ -315,7 +316,7 @@ int game(char x) {
         }
 
         if(!lineAvlbe){
-            printf(red "Line Already Chosen, Stop ruining the game :(\n" reset);lineAvlbe = 1;}
+            printf(red "Line Already Chosen, looks like you are not paying attention to the board :(\n" reset);lineAvlbe = 1;}
 
         else {valid_choice = 1;linesArry[totalmoves] = lineD;}
 
@@ -333,22 +334,72 @@ int game(char x) {
 
         // changing the right point on grid
         // if it's horizontal line
-        if(col1 < col2){
-                grid[2*row1-2][2*col1-1] = 205;
-                colorsgrid[2*row1-2][2*col1-1] = colors[totalmoves%2];}
-        else if(col1 > col2){
-                grid[2*row1-2][2*col2-1] = 205;
-                colorsgrid[2*row1-2][2*col2-1] = colors[totalmoves%2];}
+        if(row1 == row2){
+                grid[row][col] = 205;
+                colorsgrid[row][col] = colors[totalmoves%2];}
         // if it's vertical line
-        if(row1 < row2){
-                grid[2*row1-1][2*col1-2] = 186;
-                colorsgrid[2*row1-1][2*col1-2] = colors[totalmoves%2];}
-        else if(row1 > row2){
-                grid[2*row2-1][2*col1-2] = 186;
-                colorsgrid[2*row2-1][2*col1-2] = colors[totalmoves%2];}
+        if(col1 == col2){
+                grid[row][col] = 186;
+                colorsgrid[row][col] = colors[totalmoves%2];}
+
+        //------------------------------ is it a box ?-----------------------------------
+
+        if(row1 == row2){ //if it's row
+            if(!row){ //if it's not top row nor bottom row
+
+                if(grid[row+2][col] != 32 && grid[row+1][col-1] != 32 && grid[row+1][col+1] != 32)
+                        {grid[row+1][col] = totalmoves%2+65;colorsgrid[row+1][col] = backcolors[totalmoves%2];boxClosed = 1;scores[totalmoves%2]++;}
+
+            }
+
+            else if(row == 2*n){ // if it's top row , check only the box under it
+
+                if(grid[row-2][col] != 32 && grid[row-1][col-1] != 32 && grid[row-1][col+1] != 32)
+                        {grid[row-1][col] = totalmoves%2+65;colorsgrid[row-1][col] = backcolors[totalmoves%2];boxClosed = 1;scores[totalmoves%2]++;}
+
+              }
+
+            else{ // if it's bottom row , check only the box above it
+
+                if(grid[row-2][col] != 32 && grid[row-1][col-1] != 32 && grid[row-1][col+1] != 32)
+                        {grid[row-1][col] = totalmoves%2+65;colorsgrid[row-1][col] = backcolors[totalmoves%2];boxClosed = 1;scores[totalmoves%2]++;}
+
+                if(grid[row+2][col] != 32 && grid[row+1][col-1] != 32 && grid[row+1][col+1] != 32)
+                        {grid[row+1][col] = totalmoves%2+65;colorsgrid[row+1][col] = backcolors[totalmoves%2];boxClosed = 1;scores[totalmoves%2]++;}
+
+              }
+        }
+        //if it's column
+        if(col1 == col2){
+            if(!col){
+
+                if(grid[row][col+2] != 32 && grid[row-1][col+1] != 32 && grid[row+1][col+1] != 32)
+                        {grid[row][col+1] = totalmoves%2+65;colorsgrid[row][col+1] = backcolors[totalmoves%2];boxClosed = 1;scores[totalmoves%2]++;}
+
+            }
+
+            else if(col == 2*m){
+
+                if(grid[row][col-2] != 32 && grid[row-1][col-1] != 32 && grid[row+1][col-1] != 32)
+                        {grid[row][col-1] = totalmoves%2+65;colorsgrid[row][col-1] = backcolors[totalmoves%2];boxClosed = 1;scores[totalmoves%2]++;}
+
+            }
+
+            else {
+
+                if(grid[row][col-2] != 32 && grid[row-1][col-1] != 32 && grid[row+1][col-1] != 32)
+                        {grid[row][col-1] = totalmoves%2+65;colorsgrid[row][col-1] = backcolors[totalmoves%2];boxClosed = 1;scores[totalmoves%2]++;}
+
+                if(grid[row][col+2] != 32 && grid[row-1][col+1] != 32 && grid[row+1][col+1] != 32)
+                        {grid[row][col+1] = totalmoves%2+65;colorsgrid[row][col+1] = backcolors[totalmoves%2];boxClosed = 1;scores[totalmoves%2]++;}
+
+            }
+        }
+
 
 
         moves[totalmoves%2]++; // number of moves increase for the player 1 or 2
+        if(boxClosed){totalmoves--;}
         totalmoves++;
         system("cls");
 
