@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <windows.h>
 #include "playing.h"
-//#include "VS computer.h"
 
 #define  reset "\x1b[0m"
 
@@ -31,9 +30,8 @@
 #define VSCOMPUTER 2
 
 
-const char g_szClassName[] = "WindowClass";
 HINSTANCE g_hinst;
-LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProcc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 
     // navigation bar----------------------------------------------------------------
@@ -46,10 +44,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 
 			hMenu = CreateMenu();
 
-			hSubMenu = CreatePopupMenu();
-			AppendMenu(hSubMenu, MF_STRING, MODE_1, "&Player VS Player");
-			AppendMenu(hSubMenu, MF_STRING, MODE_2, "&Player Vs Computer");
-			AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hSubMenu, "&Play");
+			//hSubMenu = CreatePopupMenu();
+			//AppendMenu(hSubMenu, MF_STRING, MODE_1, "&Player VS Player");
+			//AppendMenu(hSubMenu, MF_STRING, MODE_2, "&Player Vs Computer");
+			//AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hSubMenu, "&Play");
 
 			hSubMenu = CreatePopupMenu();
 			AppendMenu(hSubMenu, MF_STRING, BEGINNER, "&Beginner");
@@ -368,7 +366,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     wc.lpszClassName = L"Buttons";
     wc.hInstance     = hInstance;
     wc.hbrBackground = GetSysColorBrush(COLOR_3DFACE);
-    wc.lpfnWndProc   = WndProc;
+    wc.lpfnWndProc   = WndProcc;
     wc.hCursor       = LoadCursor(0, IDC_ARROW);
 
     g_hinst = hInstance;

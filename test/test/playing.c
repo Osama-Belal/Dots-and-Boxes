@@ -15,6 +15,8 @@
 #define  white "\x1b[37m"
 
 #define FOREGROUND_WHITE FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY
+#define Background_Light_Red BACKGROUND_INTENSITY | BACKGROUND_RED
+#define Background_Light_Blue BACKGROUND_GREEN | BACKGROUND_BLUE
 
 /*
 void printgrid(int n, int m){
@@ -45,16 +47,27 @@ void printgrid(int n, int m){
 }
 */
 
-void print_board(int scores[], int moves[]){
+void print_board(int scores[], int moves[], int maxmoves){
 
-    printf(blue "    Player 1 score: %d                     " reset, scores[0]);
-    printf(red "    Player 2 score: %d\n" reset, scores[1]);
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE); // Gets the standard output handle
 
-    printf(blue "    Player 1 moves: %d                     " reset, moves[0]);
-    printf(red "    Player 2 moves: %d\n\n" reset, moves[1]);
+    SetConsoleTextAttribute(hOut, 9); // color is bright blue
+    printf("    Player 1 score: %d                     ", scores[0]);
+    SetConsoleTextAttribute(hOut, 12); // color is bright red
+    printf("    Player 2 score: %d\n", scores[1]);
 
-    printf(black "    Player 1 moves: %d                     " reset, moves[0]);
-    printf(black "    Player 2 moves: %d\n\n" reset, moves[1]);
+    SetConsoleTextAttribute(hOut, 9);  // color is bright blue
+    printf("    Player 1 moves: %d                     ", moves[0]);
+    SetConsoleTextAttribute(hOut, 12);  // color is bright red
+    printf("    Player 2 moves: %d\n\n", moves[1]);
+
+    printf("                     ");
+    SetConsoleTextAttribute(hOut, 14);  // color is bright yellow
+    printf("    Remaining moves: %d", maxmoves - moves[0] - moves[1]);
+
+    SetConsoleTextAttribute(hOut, FOREGROUND_WHITE);
+
+    printf("                     \n\n");
 }
 
 void backgroundyellow(){
@@ -84,16 +97,16 @@ struct line getLine(){
 
   struct line lineG;
 
-  printf(yellow "ROW: ");
+  printf(green "  ROW: ");
   scanf ("%d", &lineG.point1.row);
 
-  printf("ROW: ");
+  printf("  ROW: ");
   scanf ("%d", &lineG.point2.row);
 
-  printf("COL: ");
+  printf("  COL: ");
   scanf("%d", &lineG.point1.col);
 
-  printf("COL: ");
+  printf("  COL: ");
   scanf("%d" reset, &lineG.point2.col);
 
   return lineG;
@@ -210,26 +223,28 @@ int game(char x) {
 */
 
   // --------------------------------------- starting the game -----------------------
+
   //whenever maxmoves is reached game is over
   int maxmoves =  m*(n+1) + n*(m+1);
   int scores[2] = {0, 0}, boxClosed = 0;
-  int moves[2] = {};
-  int colors[2] = {FOREGROUND_BLUE, FOREGROUND_RED};
-  int backcolors[2] = {BACKGROUND_BLUE, BACKGROUND_RED};
-  int totalmoves = 0;
+  int moves[2] = {}, totalmoves = moves[0] + moves[1];
+  int colors[2] = {9, 12}; // bright blue & bright red
+  int backcolors[2] = {Background_Light_Blue, Background_Light_Red}; // background colors in case player scored a box
+  int currentplaying = 0;
   int row1 = 0, row2 = 0, col1 = 0, col2 = 0;
+  int chosenrows[maxmoves], chosencols[maxmoves];
   int valid_choice = 0, withinlimits = 1, lineAvlbe = 1;
 
 //--------------------------printing grid for the first time------------------
               // columns rank before the grid
               printf("\n\n                                 ");
-              for(int j = 0; j < m+1; j++){printf(cyan "%d.    " reset, j+1);}
+              for(int j = 0; j < m+1; j++){printf(yellow "%d.    " reset, j+1);}
               printf("\n\n");
 
 
               for(int i = 0;i < 2*n+1; i++){
                 if(!(i%2))
-                printf(cyan "                          %d.    " reset, i/2+1);  // rows rank left to the grid
+                printf(yellow "                          %d.    " reset, i/2+1);  // rows rank left to the grid
 
                 else
                 printf("                                ");
@@ -246,13 +261,13 @@ int game(char x) {
               }
 
   printf("\n\n");
-  print_board(scores, moves);
+  print_board(scores, moves, maxmoves);
 
 
-  while(totalmoves < maxmoves){
+  while(maxmoves - moves[0] - moves[1]){
 
     valid_choice = 0;boxClosed = 0;
-    printf(green "  Player %d's turn \n" reset, (totalmoves%2)+1);
+    printf(green "  Player %d's turn \n" reset, (currentplaying%2)+1);
 /*
     printf(yellow "  Row: ");
     scanf("%d", &row1);
@@ -283,10 +298,6 @@ int game(char x) {
     if(row1 < row2){row = 2*row1-1, col = 2*col1-2;}
     else if(row1 > row2){row = 2*row2-1, col = 2*col1-2;}
 
-
-    struct line linesArry[100];
-    linesArry[totalmoves] = lineD;
-
     int rowdiff = abs(row1 - row2);
     int coldiff = abs(col1 - col2);
 
@@ -297,28 +308,16 @@ int game(char x) {
 
     if((rowdiff==1 && !coldiff && withinlimits) || (coldiff==1 && !rowdiff && withinlimits)){
 
-
-
         //----need to make sure these points have NOT been chosen before---------------
         // is line chosen ?
         for(int i = 0; i < totalmoves; i++){
-
-           if( (lineD.point1.row == linesArry[i].point1.row || lineD.point1.row == linesArry[i].point2.row) &&
-            (lineD.point1.col == linesArry[i].point1.col || lineD.point1.col == linesArry[i].point2.col) ){
-
-                if( (lineD.point2.row == linesArry[i].point1.row || lineD.point2.row == linesArry[i].point2.row) &&
-            (lineD.point2.col == linesArry[i].point1.col || lineD.point2.col == linesArry[i].point2.col) ){
-                    lineAvlbe = 0;break;
-                }
-
-            }
-
+           if(chosenrows[i] == row && chosencols[i] == col){lineAvlbe = 0;break;}
         }
 
         if(!lineAvlbe){
             printf(red "Line Already Chosen, looks like you are not paying attention to the board :(\n" reset);lineAvlbe = 1;}
 
-        else {valid_choice = 1;linesArry[totalmoves] = lineD;}
+        else {valid_choice = 1;chosenrows[totalmoves] = row;chosencols[totalmoves] = col;}
 
     }
 
@@ -336,11 +335,11 @@ int game(char x) {
         // if it's horizontal line
         if(row1 == row2){
                 grid[row][col] = 205;
-                colorsgrid[row][col] = colors[totalmoves%2];}
+                colorsgrid[row][col] = colors[currentplaying%2];}
         // if it's vertical line
         if(col1 == col2){
                 grid[row][col] = 186;
-                colorsgrid[row][col] = colors[totalmoves%2];}
+                colorsgrid[row][col] = colors[currentplaying%2];}
 
         //------------------------------ is it a box ?-----------------------------------
 
@@ -348,24 +347,24 @@ int game(char x) {
             if(!row){ //if it's not top row nor bottom row
 
                 if(grid[row+2][col] != 32 && grid[row+1][col-1] != 32 && grid[row+1][col+1] != 32)
-                        {grid[row+1][col] = totalmoves%2+65;colorsgrid[row+1][col] = backcolors[totalmoves%2];boxClosed = 1;scores[totalmoves%2]++;}
+                        {grid[row+1][col] = currentplaying%2+65;colorsgrid[row+1][col] = backcolors[currentplaying%2];boxClosed = 1;scores[currentplaying%2]++;}
 
             }
 
             else if(row == 2*n){ // if it's top row , check only the box under it
 
                 if(grid[row-2][col] != 32 && grid[row-1][col-1] != 32 && grid[row-1][col+1] != 32)
-                        {grid[row-1][col] = totalmoves%2+65;colorsgrid[row-1][col] = backcolors[totalmoves%2];boxClosed = 1;scores[totalmoves%2]++;}
+                        {grid[row-1][col] = currentplaying%2+65;colorsgrid[row-1][col] = backcolors[currentplaying%2];boxClosed = 1;scores[currentplaying%2]++;}
 
               }
 
             else{ // if it's bottom row , check only the box above it
 
                 if(grid[row-2][col] != 32 && grid[row-1][col-1] != 32 && grid[row-1][col+1] != 32)
-                        {grid[row-1][col] = totalmoves%2+65;colorsgrid[row-1][col] = backcolors[totalmoves%2];boxClosed = 1;scores[totalmoves%2]++;}
+                        {grid[row-1][col] = currentplaying%2+65;colorsgrid[row-1][col] = backcolors[currentplaying%2];boxClosed = 1;scores[currentplaying%2]++;}
 
                 if(grid[row+2][col] != 32 && grid[row+1][col-1] != 32 && grid[row+1][col+1] != 32)
-                        {grid[row+1][col] = totalmoves%2+65;colorsgrid[row+1][col] = backcolors[totalmoves%2];boxClosed = 1;scores[totalmoves%2]++;}
+                        {grid[row+1][col] = currentplaying%2+65;colorsgrid[row+1][col] = backcolors[currentplaying%2];boxClosed = 1;scores[currentplaying%2]++;}
 
               }
         }
@@ -374,45 +373,46 @@ int game(char x) {
             if(!col){
 
                 if(grid[row][col+2] != 32 && grid[row-1][col+1] != 32 && grid[row+1][col+1] != 32)
-                        {grid[row][col+1] = totalmoves%2+65;colorsgrid[row][col+1] = backcolors[totalmoves%2];boxClosed = 1;scores[totalmoves%2]++;}
+                        {grid[row][col+1] = currentplaying%2+65;colorsgrid[row][col+1] = backcolors[currentplaying%2];boxClosed = 1;scores[currentplaying%2]++;}
 
             }
 
             else if(col == 2*m){
 
                 if(grid[row][col-2] != 32 && grid[row-1][col-1] != 32 && grid[row+1][col-1] != 32)
-                        {grid[row][col-1] = totalmoves%2+65;colorsgrid[row][col-1] = backcolors[totalmoves%2];boxClosed = 1;scores[totalmoves%2]++;}
+                        {grid[row][col-1] = currentplaying%2+65;colorsgrid[row][col-1] = backcolors[currentplaying%2];boxClosed = 1;scores[currentplaying%2]++;}
 
             }
 
             else {
 
                 if(grid[row][col-2] != 32 && grid[row-1][col-1] != 32 && grid[row+1][col-1] != 32)
-                        {grid[row][col-1] = totalmoves%2+65;colorsgrid[row][col-1] = backcolors[totalmoves%2];boxClosed = 1;scores[totalmoves%2]++;}
+                        {grid[row][col-1] = currentplaying%2+65;colorsgrid[row][col-1] = backcolors[currentplaying%2];boxClosed = 1;scores[currentplaying%2]++;}
 
                 if(grid[row][col+2] != 32 && grid[row-1][col+1] != 32 && grid[row+1][col+1] != 32)
-                        {grid[row][col+1] = totalmoves%2+65;colorsgrid[row][col+1] = backcolors[totalmoves%2];boxClosed = 1;scores[totalmoves%2]++;}
+                        {grid[row][col+1] = currentplaying%2+65;colorsgrid[row][col+1] = backcolors[currentplaying%2];boxClosed = 1;scores[currentplaying%2]++;}
 
             }
         }
 
 
 
-        moves[totalmoves%2]++; // number of moves increase for the player 1 or 2
-        if(boxClosed){totalmoves--;}
-        totalmoves++;
+        moves[currentplaying%2]++;
+        totalmoves = moves[0] + moves[1]; // number of moves increase for the player 1 or 2
+        if(boxClosed){currentplaying--;}
+        currentplaying++;
         system("cls");
 
 //--------------------------printing grid after each valid move------------------
               // columns rank before the grid
               printf("\n\n                                 ");
-              for(int j = 0; j < m+1; j++){printf(cyan "%d.    " reset, j+1);}
+              for(int j = 0; j < m+1; j++){printf(yellow "%d.    " reset, j+1);}
               printf("\n\n");
 
 
               for(int i = 0;i < 2*n+1; i++){
                 if(!(i%2))
-                printf(cyan "                          %d.    " reset, i/2+1);  // rows rank left to the grid
+                printf(yellow "                          %d.    " reset, i/2+1);  // rows rank left to the grid
 
                 else
                 printf("                                ");
@@ -431,7 +431,7 @@ int game(char x) {
               }
 
         printf("\n\n");
-        print_board(scores, moves);
+        print_board(scores, moves, maxmoves);
 
     }
 
@@ -456,8 +456,8 @@ int game(char x) {
   }
 
 
-  if(scores[0] > scores[1])printf(red "          Player 1 is the WINNER!" reset);
-  else if(scores[0] < scores[1])printf(blue "                   Player 2 is the WINNER!" reset);
+  if(scores[0] > scores[1])printf(blue "          Player 1 is the WINNER!" reset);
+  else if(scores[0] < scores[1])printf(red "                   Player 2 is the WINNER!" reset);
   else printf(cyan "               It seems it's draw!" reset);
 
   return 0;
