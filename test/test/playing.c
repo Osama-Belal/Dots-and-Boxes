@@ -63,9 +63,11 @@ void print_board(int scores[], int moves[], int maxmoves){
 
     printf("                     ");
     SetConsoleTextAttribute(hOut, 14);  // color is bright yellow
-    printf("    Remaining moves: %d", maxmoves - moves[0] - moves[1]);
+    printf("    Remaining moves: %d\n", maxmoves - moves[0] - moves[1]);
 
-    SetConsoleTextAttribute(hOut, FOREGROUND_WHITE);
+    printf("    Enter (-1) to UNDO,  (-2) to REDO \n    And remember, you need to UNDO First to REDO Back :)");
+
+    SetConsoleTextAttribute(hOut, FOREGROUND_WHITE); // resets the color
 
     printf("                     \n\n");
 }
@@ -74,6 +76,14 @@ void backgroundyellow(){
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE); // Gets the standard output handle
     SetConsoleTextAttribute(hOut, 100); //The font is set to it's assigned color in my array colorsgrid
 }
+
+
+struct players{
+    char name[30];
+    int color;
+    int score;
+};
+
 
 struct point{
     int row;
@@ -84,12 +94,6 @@ struct line{
     struct point point1;
     struct point point2;
 };
-
-
-struct players{
-    int color;
-};
-
 
 
 // function returns struct
@@ -233,6 +237,7 @@ int game(char x) {
   int currentplaying = 0;
   int row1 = 0, row2 = 0, col1 = 0, col2 = 0;
   int chosenrows[maxmoves], chosencols[maxmoves];
+  int redorows[maxmoves], redocols[maxmoves], redocounter = 0;
   int valid_choice = 0, withinlimits = 1, lineAvlbe = 1;
 
 //--------------------------printing grid for the first time------------------
@@ -266,6 +271,8 @@ int game(char x) {
 
   while(maxmoves - moves[0] - moves[1]){
     no_moves_to_undo:
+    no_moves_to_redo:
+
     valid_choice = 0;boxClosed = 0;
     totalmoves = moves[0] + moves[1];
     printf(green "  Player %d's turn \n" reset, (currentplaying%2)+1);
@@ -291,10 +298,17 @@ int game(char x) {
     int row = 0, col = 0; // only for painting the chosen line
 
 
+
 //----------------------------------- UNDO Function ----------------------------------------------
+
     if(row1 == -1 || row2 == -1 || col1 == -1 || col2 == -1){
 
-        if(!totalmoves){printf("  No Moves to UNDO :)\n");goto no_moves_to_undo;}
+        if(!totalmoves){
+            HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE); // Gets the standard output handle
+            SetConsoleTextAttribute(hOut, 4); // color is bright blue
+            printf("  No Previous Moves to UNDO :)\n");goto no_moves_to_undo;
+            SetConsoleTextAttribute(hOut, FOREGROUND_WHITE); // color is bright blue
+        }
 
         else{
             row = chosenrows[totalmoves-1];
@@ -303,8 +317,9 @@ int game(char x) {
             chosenrows[totalmoves-1] = 0;
             chosencols[totalmoves-1] = 0;
 
-            //redorows[] = row;
-            //redocols[] = col;
+            redorows[redocounter] = row;
+            redocols[redocounter] = col;
+            redocounter++;
 
             //resetting the point
             grid[row][col] = ' ';
@@ -347,55 +362,45 @@ int game(char x) {
 //----------------------------------- REDO Function ----------------------------------------------
     if(row1 == -2 || row2 == -2 || col1 == -2 || col2 == -2){
 
-        if(!totalmoves){printf("  No Moves to UNDO :)");goto undo;}
+        if(!redocounter){
+            HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE); // Gets the standard output handle
+            SetConsoleTextAttribute(hOut, 4); // color is bright blue
+            printf("  No Further Moves to REDO :)\n");goto no_moves_to_redo;
+            SetConsoleTextAttribute(hOut, FOREGROUND_WHITE); // color is bright blue
+        }
 
         else{
-            row = chosenrows[totalmoves-1];
-            col = chosencols[totalmoves-1];
 
-            chosenrows[totalmoves-1] = 0;
-            chosencols[totalmoves-1] = 0;
+            row = redorows[redocounter-1];
+            col = redocols[redocounter-1];
+            if(redocounter)redocounter--;
 
-            //redorows[] = row;
-            //redocols[] = col;
+            chosenrows[totalmoves] = row;
+            chosencols[totalmoves] = col;
 
-            //resetting the point
-            grid[row][col] = ' ';
-            colorsgrid[row][col] = FOREGROUND_WHITE ;
-
-            // ---------resetting any closed box ------------
-            int undoclosedbox = 0;
-            // if it's vertical line
             if(row%2){
-                    if(grid[row][col+1] == 65 || grid[row][col+1] == 66){undoclosedbox = 1;scores[currentplaying%2]--;
-                    grid[row][col+1] = ' ';
-                    colorsgrid[row][col+1] = FOREGROUND_WHITE ;}
-
-                    if(grid[row][col-1] == 65 || grid[row][col-1] == 66){undoclosedbox = 1;scores[currentplaying%2]--;
-                    grid[row][col-1] = ' ';
-                    colorsgrid[row][col-1] = FOREGROUND_WHITE ;}
+                grid[row][col] = 186;
+                colorsgrid[row][col] = colors[currentplaying%2];
             }
 
-            // if it's horizontal line
             else{
-                if(grid[row+1][col] == 65 || grid[row+1][col] == 66){undoclosedbox = 1;scores[currentplaying%2]--;
-                grid[row+1][col] = ' ';
-                colorsgrid[row+1][col] = FOREGROUND_WHITE ;}
-
-                if(grid[row-1][col] == 65 || grid[row-1][col] == 66){undoclosedbox = 1;scores[currentplaying%2]--;
-                grid[row-1][col] = ' ';
-                colorsgrid[row-1][col] = FOREGROUND_WHITE ;}
+                grid[row][col] = 205;
+                colorsgrid[row][col] = colors[currentplaying%2];
             }
 
-            if(undoclosedbox){currentplaying++;}
+            goto redo;
 
-            currentplaying++;
-            moves[currentplaying%2]--;
-
-            goto undo;
         }
+
+
     }
 
+//----------------------------------End of UNDO & REDO ----------------------------------
+
+
+
+    // resetting the redo array in case they enter a move
+    for(int i = 0; i < maxmoves; i++){redorows[i] = 0;redocols[i] = 0;redocounter = 0;}
 
 
     // changing the right point on grid
@@ -452,8 +457,8 @@ int game(char x) {
                 colorsgrid[row][col] = colors[currentplaying%2];}
 
         //------------------------------ is it a box ?-----------------------------------
-
-        if(row1 == row2){ //if it's row
+        redo:
+        if(row % 2 == 0){ //if it's row
             if(!row){ //if it's not top row nor bottom row
 
                 if(grid[row+2][col] != 32 && grid[row+1][col-1] != 32 && grid[row+1][col+1] != 32)
@@ -479,7 +484,7 @@ int game(char x) {
               }
         }
         //if it's column
-        if(col1 == col2){
+        if(row % 2 == 1){
             if(!col){
 
                 if(grid[row][col+2] != 32 && grid[row-1][col+1] != 32 && grid[row+1][col+1] != 32)
