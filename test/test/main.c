@@ -153,10 +153,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 
 
 
-                    static wchar_t *lyrics =  L"     Dots and Boxes \nWelcome to the game!";
+                    static wchar_t *lyrics =  L"         Dots and Boxes \n   Welcome to the game!";
 					CreateWindowW(L"Static", lyrics,
                                     WS_CHILD | WS_VISIBLE | SS_LEFT,
-                                    165, 40, 300, 230,
+                                    145, 40, 180, 40,
                                     hwnd, (HMENU) 1, NULL, NULL);
 
         /*
@@ -309,7 +309,7 @@ static HWND hwndCombo, hwndStatic;
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	LPSTR lpCmdLine, int nCmdShow)
 {
-	/*WNDCLASSEX wc;
+	WNDCLASSEX wc;
 	HWND hwnd;
 	MSG Msg;
 
@@ -321,7 +321,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	wc.hInstance	 = hInstance;
 	wc.hIcon		 = NULL;
 	wc.hCursor		 = LoadCursor(NULL, IDC_ARROW);
-	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW+1);
+	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW-2);
 	wc.lpszMenuName  = NULL;
 	wc.lpszClassName = g_szClassName;
 	wc.hIconSm		 = NULL;
@@ -338,8 +338,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		g_szClassName,
 		"Dots and Boxes",
 		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, CW_USEDEFAULT, 900, 400,
+		600, 250, 500, 400,
 		NULL, NULL, hInstance, NULL);
+
+
+
 
 	if(hwnd == NULL)
 	{
@@ -351,20 +354,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	ShowWindow(hwnd, nCmdShow);
 	UpdateWindow(hwnd);
 
+
 	while(GetMessage(&Msg, NULL, 0, 0) > 0)
 	{
 		TranslateMessage(&Msg);
 		DispatchMessage(&Msg);
 	}
-	return Msg.wParam;*/
+	return Msg.wParam;
 
 
 
 
-
+/*
 
     MSG  msg;
-    WNDCLASSW wc = {0};
+//    WNDCLASSW wc = {0};
     wc.lpszClassName = L"Buttons";
     wc.hInstance     = hInstance;
     wc.hbrBackground = GetSysColorBrush(COLOR_3DFACE);
@@ -394,7 +398,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
     return (int) msg.wParam;
 
-
+*/
 
 
 

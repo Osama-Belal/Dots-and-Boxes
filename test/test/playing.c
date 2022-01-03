@@ -265,8 +265,9 @@ int game(char x) {
 
 
   while(maxmoves - moves[0] - moves[1]){
-
+    no_moves_to_undo:
     valid_choice = 0;boxClosed = 0;
+    totalmoves = moves[0] + moves[1];
     printf(green "  Player %d's turn \n" reset, (currentplaying%2)+1);
 /*
     printf(yellow "  Row: ");
@@ -287,16 +288,125 @@ int game(char x) {
     col1 = lineD.point1.col;
     col2 = lineD.point2.col;
 
-
     int row = 0, col = 0; // only for painting the chosen line
+
+
+//----------------------------------- UNDO Function ----------------------------------------------
+    if(row1 == -1 || row2 == -1 || col1 == -1 || col2 == -1){
+
+        if(!totalmoves){printf("  No Moves to UNDO :)\n");goto no_moves_to_undo;}
+
+        else{
+            row = chosenrows[totalmoves-1];
+            col = chosencols[totalmoves-1];
+
+            chosenrows[totalmoves-1] = 0;
+            chosencols[totalmoves-1] = 0;
+
+            //redorows[] = row;
+            //redocols[] = col;
+
+            //resetting the point
+            grid[row][col] = ' ';
+            colorsgrid[row][col] = FOREGROUND_WHITE ;
+
+            // ---------resetting any closed box ------------
+            int undoclosedbox = 0;
+            // if it's vertical line
+            if(row%2){
+                    if(grid[row][col+1] == 65 || grid[row][col+1] == 66){undoclosedbox = 1;scores[currentplaying%2]--;
+                    grid[row][col+1] = ' ';
+                    colorsgrid[row][col+1] = FOREGROUND_WHITE ;}
+
+                    if(grid[row][col-1] == 65 || grid[row][col-1] == 66){undoclosedbox = 1;scores[currentplaying%2]--;
+                    grid[row][col-1] = ' ';
+                    colorsgrid[row][col-1] = FOREGROUND_WHITE ;}
+            }
+
+            // if it's horizontal line
+            else{
+                if(grid[row+1][col] == 65 || grid[row+1][col] == 66){undoclosedbox = 1;scores[currentplaying%2]--;
+                grid[row+1][col] = ' ';
+                colorsgrid[row+1][col] = FOREGROUND_WHITE ;}
+
+                if(grid[row-1][col] == 65 || grid[row-1][col] == 66){undoclosedbox = 1;scores[currentplaying%2]--;
+                grid[row-1][col] = ' ';
+                colorsgrid[row-1][col] = FOREGROUND_WHITE ;}
+            }
+
+            if(undoclosedbox){currentplaying++;undoclosedbox = 0;}
+
+            currentplaying++;
+            moves[currentplaying%2]--;
+
+            goto undo;
+        }
+    }
+
+
+//----------------------------------- REDO Function ----------------------------------------------
+    if(row1 == -2 || row2 == -2 || col1 == -2 || col2 == -2){
+
+        if(!totalmoves){printf("  No Moves to UNDO :)");goto undo;}
+
+        else{
+            row = chosenrows[totalmoves-1];
+            col = chosencols[totalmoves-1];
+
+            chosenrows[totalmoves-1] = 0;
+            chosencols[totalmoves-1] = 0;
+
+            //redorows[] = row;
+            //redocols[] = col;
+
+            //resetting the point
+            grid[row][col] = ' ';
+            colorsgrid[row][col] = FOREGROUND_WHITE ;
+
+            // ---------resetting any closed box ------------
+            int undoclosedbox = 0;
+            // if it's vertical line
+            if(row%2){
+                    if(grid[row][col+1] == 65 || grid[row][col+1] == 66){undoclosedbox = 1;scores[currentplaying%2]--;
+                    grid[row][col+1] = ' ';
+                    colorsgrid[row][col+1] = FOREGROUND_WHITE ;}
+
+                    if(grid[row][col-1] == 65 || grid[row][col-1] == 66){undoclosedbox = 1;scores[currentplaying%2]--;
+                    grid[row][col-1] = ' ';
+                    colorsgrid[row][col-1] = FOREGROUND_WHITE ;}
+            }
+
+            // if it's horizontal line
+            else{
+                if(grid[row+1][col] == 65 || grid[row+1][col] == 66){undoclosedbox = 1;scores[currentplaying%2]--;
+                grid[row+1][col] = ' ';
+                colorsgrid[row+1][col] = FOREGROUND_WHITE ;}
+
+                if(grid[row-1][col] == 65 || grid[row-1][col] == 66){undoclosedbox = 1;scores[currentplaying%2]--;
+                grid[row-1][col] = ' ';
+                colorsgrid[row-1][col] = FOREGROUND_WHITE ;}
+            }
+
+            if(undoclosedbox){currentplaying++;}
+
+            currentplaying++;
+            moves[currentplaying%2]--;
+
+            goto undo;
+        }
+    }
+
+
 
     // changing the right point on grid
     // if it's horizontal line
     if(col1 < col2){row = 2*row1-2, col = 2*col1-1;}
     else if(col1 > col2){row = 2*row1-2, col = 2*col2-1;}
+
     // if it's vertical line
     if(row1 < row2){row = 2*row1-1, col = 2*col1-2;}
     else if(row1 > row2){row = 2*row2-1, col = 2*col1-2;}
+
 
     int rowdiff = abs(row1 - row2);
     int coldiff = abs(col1 - col2);
@@ -315,7 +425,7 @@ int game(char x) {
         }
 
         if(!lineAvlbe){
-            printf(red "Line Already Chosen, looks like you are not paying attention to the board :(\n" reset);lineAvlbe = 1;}
+            printf(red "  Line Already Chosen, looks like you are not paying attention to the board :(\n" reset);lineAvlbe = 1;}
 
         else {valid_choice = 1;chosenrows[totalmoves] = row;chosencols[totalmoves] = col;}
 
@@ -401,10 +511,11 @@ int game(char x) {
         totalmoves = moves[0] + moves[1]; // number of moves increase for the player 1 or 2
         if(boxClosed){currentplaying--;}
         currentplaying++;
-        system("cls");
 
 //--------------------------printing grid after each valid move------------------
               // columns rank before the grid
+              undo:
+              system("cls");
               printf("\n\n                                 ");
               for(int j = 0; j < m+1; j++){printf(yellow "%d.    " reset, j+1);}
               printf("\n\n");
@@ -431,9 +542,26 @@ int game(char x) {
               }
 
         printf("\n\n");
+        for(int i = 0; i < totalmoves; i++){printf("%d ", chosenrows[i]);}
+        printf("\n");
+        for(int i = 0; i < totalmoves; i++){printf("%d ", chosencols[i]);}
         print_board(scores, moves, maxmoves);
 
     }
+
+
+  }
+
+
+  if(scores[0] > scores[1])printf(blue "          Player 1 is the WINNER!" reset);
+  else if(scores[0] < scores[1])printf(red "                   Player 2 is the WINNER!" reset);
+  else printf(cyan "               It seems it's draw!" reset);
+
+  return 0;
+
+}
+
+
 
 
     // is line chosen ?
@@ -451,15 +579,3 @@ int game(char x) {
 
         }
 */
-
-
-  }
-
-
-  if(scores[0] > scores[1])printf(blue "          Player 1 is the WINNER!" reset);
-  else if(scores[0] < scores[1])printf(red "                   Player 2 is the WINNER!" reset);
-  else printf(cyan "               It seems it's draw!" reset);
-
-  return 0;
-
-}
