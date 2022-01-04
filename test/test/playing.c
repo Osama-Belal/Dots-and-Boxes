@@ -92,8 +92,13 @@ struct players{
 struct players getplayerinfo(){
 
   struct players player;
+
   printf("Player Name: ");
   fgets(player.name, 30, stdin);
+  while(player.name[0] < 'A' || player.name[0] > 'z'){
+    if(player.name[0] != '\n')printf(reset red "   Enter Valid Name" reset);
+    fgets(player.name, 30, stdin);
+  }
 
   return player;
 }
@@ -257,6 +262,8 @@ int game(char x) {
   int chosenrows[maxmoves], chosencols[maxmoves];
   int redorows[maxmoves], redocols[maxmoves], redocounter = 0;
   int valid_choice = 0, withinlimits = 1, lineAvlbe = 1;
+
+  static struct players top10[10];
 
 
   //----------------------Taking players Information----------------------------
@@ -601,17 +608,30 @@ int game(char x) {
   if(scores[0] > scores[1]){
         printf("\t\t\tCongratulations, ");
         SetConsoleTextAttribute(hOut, colors[0]);
-        printf("%s\t\t\t You are the WINNER !", playersInfo[0].name);}
+        printf("%s\t\t\t You are the WINNER !\n", playersInfo[0].name);}
 
 
   else if(scores[0] < scores[1]){
         printf("\t\t\tCongratulations, ");
         SetConsoleTextAttribute(hOut, colors[1]);
-        printf("%s\t\t\t You are the WINNER !", playersInfo[1].name);}
+        printf("%s\t\t\t You are the WINNER !\n", playersInfo[1].name);}
 
-  else printf(cyan "\t\t\tNo Winners Today \n\t\t\t  It's a TIE !" reset);
+  else printf(cyan "\t\t\tNo Winners Today \n\t\t\t  It's a TIE !\n" reset);
 
   SetConsoleTextAttribute(hOut, FOREGROUND_WHITE);
+
+
+  //compare the last game players to the top 10
+  for(int i = 0; i < 2; i++){
+        for(int j = 0; j < 10; j++){
+            if(playersInfo[i].score > top10[j].score){top10[j] = playersInfo[i];break;}
+        }
+  }
+
+  // print top 10
+  for(int i = 0; i < 10; i++){
+        printf("\t\t\t%d. %s \t\t %d\n\t\t", i+1, top10[i].name, top10[i].score);
+  }
 
   return 0;
 
