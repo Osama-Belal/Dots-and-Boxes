@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <windows.h>
 #include "playing.h"
-//#include "VS computer.h"
+#include "top_10.h"
+#include "VS computer.h"
 
 #define  reset "\x1b[0m"
 
@@ -21,20 +22,18 @@
 
 #define GAME_GUIDE 9001
 #define TOP_10 9002
-#define MODE_1 9003
-#define MODE_2 9004
+#define VSPLAYER 9003
+#define VSCOMPUTER 9004
 #define BEGINNER 9005
 #define EXPERT 9006
 #define CHOOSE_DIFFICULTY 9007
-
-#define VSPLAYER 1
-#define VSCOMPUTER 2
 
 
 const char g_szClassName[] = "WindowClass";
 HINSTANCE g_hinst;
 LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
+    static int computer_flag, players_flag;
 
     // navigation bar----------------------------------------------------------------
 	switch(Message)
@@ -47,8 +46,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 			hMenu = CreateMenu();
 
 			hSubMenu = CreatePopupMenu();
-			AppendMenu(hSubMenu, MF_STRING, MODE_1, "&Player VS Player");
-			AppendMenu(hSubMenu, MF_STRING, MODE_2, "&Player Vs Computer");
+			AppendMenu(hSubMenu, MF_STRING, VSPLAYER, "&Player VS Player");
+			AppendMenu(hSubMenu, MF_STRING, VSCOMPUTER, "&Player Vs Computer");
 			AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hSubMenu, "&Play");
 
 			hSubMenu = CreatePopupMenu();
@@ -93,21 +92,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 		break;
 		case WM_COMMAND:
 
-            // file
-			switch(LOWORD(wParam))
-			{
-				case TOP_10:
-					MessageBox(hwnd, "TOP 10 List!", "Woo!", MB_OK);break;
-			}
-
 
             // Mode
 			switch(LOWORD(wParam))
 			{
-				case MODE_1:
-					MessageBox(hwnd, "Player VS Player", "SURE!", MB_OK);break;
-                case MODE_2:
-					MessageBox(hwnd, "Player VS Computer", "SURE!", MB_OK);break;
+				case VSPLAYER:
+					MessageBox(hwnd, "Player VS Player\n Choose Grid Difficulty!", "Half The Way ..", MB_OK);
+					computer_flag = 0;players_flag = 1;break;
+                case VSCOMPUTER:
+					MessageBox(hwnd, "You Are Playing Against Computer!\n Choose Grid Difficulty!", "Half The Way ..", MB_OK);
+					computer_flag = 1;players_flag = 0;break;
 			}
 
 
@@ -115,15 +109,34 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 			switch(LOWORD(wParam))
 			{
 				case BEGINNER:
-					MessageBox(hwnd, "Beginner (2 X 2) Boxes", "SURE!", MB_OK);system("cls");game('b');break;
+                    system("cls");
+					if(!computer_flag && players_flag){game('b');break;}
+					else if(computer_flag && !players_flag){vs_computer('b');break;}
+					else{MessageBox(hwnd, "\tChoose Mode First!\n Player VS Player  or  Player VS Computer", "Stay focus!", MB_OK);break;}
+
                 case EXPERT:
-					MessageBox(hwnd, "Expert (5 X 5) Boxes", "SURE!", MB_OK);system("cls");game('e');break;
+					system("cls");
+					if(!computer_flag && players_flag){game('e');break;}
+					else if(computer_flag && !players_flag){vs_computer('e');break;}
+					else{MessageBox(hwnd, "\tChoose Mode First!\n Player VS Player  or  Player VS Computer", "Stay focus!", MB_OK);break;}
+
                 case CHOOSE_DIFFICULTY:
-					MessageBox(hwnd, "Choose Grid (n X m) Boxs", "SURE!", MB_OK);system("cls");game('c');break;
-                case VSPLAYER:
-					MessageBox(hwnd, "You Are 2 Players!", "SURE!", MB_OK);system("cls");break;
-                case VSCOMPUTER:
-					MessageBox(hwnd, "You Are Playing Against Computer!", "SURE!", MB_OK);system("cls");break;
+					system("cls");
+					if(!computer_flag && players_flag){game('c');break;}
+					else if(computer_flag && !players_flag){vs_computer('c');break;}
+					else{MessageBox(hwnd, "\tChoose Mode First!\n Player VS Player  or  Player VS Computer", "Stay focus!", MB_OK);break;}
+
+
+			}
+
+
+			// OTHER
+			switch(LOWORD(wParam))
+			{
+				case TOP_10:
+					MessageBox(hwnd, "TOP 10 List!", "Woo!", MB_OK);break;
+                case GAME_GUIDE:
+					MessageBox(hwnd, "I'll show you the guide!", "Woo!", MB_OK);break;
 			}
 
 
@@ -220,9 +233,17 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
                 WS_VISIBLE | WS_CHILD ,
                 250, 160, 150, 30, hwnd, (HMENU) VSCOMPUTER, NULL, NULL);
 
+            CreateWindowW(L"Button", L"TOP 10 List",
+                WS_VISIBLE | WS_CHILD ,
+                80, 220, 150, 30, hwnd, (HMENU) TOP_10, NULL, NULL);
+
+            CreateWindowW(L"Button", L"Game Guide",
+                WS_VISIBLE | WS_CHILD ,
+                240, 220, 150, 30, hwnd, (HMENU) GAME_GUIDE, NULL, NULL);
+
             CreateWindowW(L"Button", L"EXIT GAME",
                 WS_VISIBLE | WS_CHILD ,
-                80, 220, 310, 30, hwnd, (HMENU) EXIT, NULL, NULL);
+                90, 280, 290, 30, hwnd, (HMENU) EXIT, NULL, NULL);
             break;
     }
 
@@ -293,11 +314,7 @@ static HWND hwndCombo, hwndStatic;
 
 
 
-
-
-
 	//------------------------------Dropbox-----------------------------
-
 
 	return 0;
 }

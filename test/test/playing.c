@@ -1,6 +1,9 @@
+#include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <windows.h>
+#include <string.h>
+#include <math.h>
+#include "top_10.h"
 
 #define  reset "\x1b[0m"
 
@@ -83,6 +86,19 @@ struct players{
     int color;
     int score;
 };
+
+
+// function returns struct
+struct players getplayerinfo(){
+
+  struct players player;
+
+  printf("Player Name: ");
+  fgets(player.name, 30, stdin);
+
+  return player;
+}
+
 
 
 struct point{
@@ -230,6 +246,9 @@ int game(char x) {
 
   //whenever maxmoves is reached game is over
   int maxmoves =  m*(n+1) + n*(m+1);
+
+  struct players playersInfo[2];
+
   int scores[2] = {0, 0}, boxClosed = 0;
   int moves[2] = {}, totalmoves = moves[0] + moves[1];
   int colors[2] = {9, 12}; // bright blue & bright red
@@ -239,6 +258,23 @@ int game(char x) {
   int chosenrows[maxmoves], chosencols[maxmoves];
   int redorows[maxmoves], redocols[maxmoves], redocounter = 0;
   int valid_choice = 0, withinlimits = 1, lineAvlbe = 1;
+
+
+  //----------------------Taking players Information----------------------------
+
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    printf("\n\n\t\t\t");
+    SetConsoleTextAttribute(hOut, backcolors[0]);
+    printf(" First ");
+    playersInfo[0] = getplayerinfo();
+
+    printf("\n\n\t\t\t");
+    SetConsoleTextAttribute(hOut, backcolors[1]);
+    printf(" Second ");
+    playersInfo[1] = getplayerinfo();
+    SetConsoleTextAttribute(hOut, FOREGROUND_WHITE); // resets the color
+
+    system("cls");
 
 //--------------------------printing grid for the first time------------------
               // columns rank before the grid
@@ -275,7 +311,13 @@ int game(char x) {
 
     valid_choice = 0;boxClosed = 0;
     totalmoves = moves[0] + moves[1];
-    printf(green "  Player %d's turn \n" reset, (currentplaying%2)+1);
+    printf(green "   Turn OF: " reset);
+
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hOut, colors[currentplaying%2]);
+    printf(" %s", playersInfo[currentplaying%2].name);
+    SetConsoleTextAttribute(hOut, FOREGROUND_WHITE);
+
 /*
     printf(yellow "  Row: ");
     scanf("%d", &row1);
@@ -547,9 +589,6 @@ int game(char x) {
               }
 
         printf("\n\n");
-        for(int i = 0; i < totalmoves; i++){printf("%d ", chosenrows[i]);}
-        printf("\n");
-        for(int i = 0; i < totalmoves; i++){printf("%d ", chosencols[i]);}
         print_board(scores, moves, maxmoves);
 
     }
@@ -557,10 +596,23 @@ int game(char x) {
 
   }
 
+    playersInfo[0].score = scores[0];
+    playersInfo[1].score = scores[1];
 
-  if(scores[0] > scores[1])printf(blue "          Player 1 is the WINNER!" reset);
-  else if(scores[0] < scores[1])printf(red "                   Player 2 is the WINNER!" reset);
-  else printf(cyan "               It seems it's draw!" reset);
+  if(scores[0] > scores[1]){
+        printf("\t\t\tCongratulations, ");
+        SetConsoleTextAttribute(hOut, colors[0]);
+        printf("%s\t\t\t You are the WINNER !", playersInfo[0].name);}
+
+
+  else if(scores[0] < scores[1]){
+        printf("\t\t\tCongratulations, ");
+        SetConsoleTextAttribute(hOut, colors[1]);
+        printf("%s\t\t\t You are the WINNER !", playersInfo[1].name);}
+
+  else printf(cyan "\t\t\tNo Winners Today \n\t\t\t  It's a TIE !" reset);
+
+  SetConsoleTextAttribute(hOut, FOREGROUND_WHITE);
 
   return 0;
 

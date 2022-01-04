@@ -1,400 +1,484 @@
+#include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <windows.h>
+#include <string.h>
+#include <time.h>
+#include <math.h>
 #include "playing.h"
 
-#define  reset "\x1b[0m"
-
-
-#define  black "\x1b[30m"
-#define  red "\x1b[31m"
-#define  green "\x1b[32m"
-#define  yellow "\x1b[33m"
-#define  blue "\x1b[34m"
-#define  magenta "\x1b[35m"
-#define  cyan "\x1b[36m"
-#define  white "\x1b[37m"
-
-
-#define EXIT 0
-
-#define GAME_GUIDE 9001
-#define TOP_10 9002
-#define MODE_1 9003
-#define MODE_2 9004
-#define BEGINNER 9005
-#define EXPERT 9006
-#define CHOOSE_DIFFICULTY 9007
-
-#define VSPLAYER 1
-#define VSCOMPUTER 2
-
-
-HINSTANCE g_hinst;
-LRESULT CALLBACK WndProcc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
-{
-
-    // navigation bar----------------------------------------------------------------
-	switch(Message)
-	{
-		case WM_CREATE:
-		{
-			HMENU hMenu, hSubMenu;
-			HICON hIcon, hIconSm;
-
-			hMenu = CreateMenu();
-
-			//hSubMenu = CreatePopupMenu();
-			//AppendMenu(hSubMenu, MF_STRING, MODE_1, "&Player VS Player");
-			//AppendMenu(hSubMenu, MF_STRING, MODE_2, "&Player Vs Computer");
-			//AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hSubMenu, "&Play");
-
-			hSubMenu = CreatePopupMenu();
-			AppendMenu(hSubMenu, MF_STRING, BEGINNER, "&Beginner");
-			AppendMenu(hSubMenu, MF_STRING, EXPERT, "&Expert");
-			AppendMenu(hSubMenu, MF_STRING, CHOOSE_DIFFICULTY, "&Choose Grid");
-			AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hSubMenu, "&Modes");
-
-			hSubMenu = CreatePopupMenu();
-			AppendMenu(hSubMenu, MF_STRING, GAME_GUIDE, "&Game Guide");
-			AppendMenu(hSubMenu, MF_STRING, TOP_10, "&Top 10");
-			AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hSubMenu, "&More");
-
-            hSubMenu = CreatePopupMenu();
-			AppendMenu(hSubMenu, MF_STRING, EXIT, "YES");
-
-			AppendMenu(hSubMenu, MF_STRING, EXIT, "NO");
-			AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hSubMenu, "&Exit");
-
-			SetMenu(hwnd, hMenu);
-
-			hIcon = (HICON)LoadImage(NULL, "menu_two.ico", IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
-			if(hIcon)
-			{
-				SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
-			}
-			else
-			{
-				MessageBox(hwnd, "Could not load large icon! Is it in the current working directory?", "Error", MB_OK | MB_ICONERROR);
-			}
-
-			hIconSm = (HICON)LoadImage(NULL, "menu_two.ico", IMAGE_ICON, 16, 16, LR_LOADFROMFILE);
-			if(hIconSm)
-			{
-				SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIconSm);
-			}
-			else
-			{
-				MessageBox(hwnd, "Could not load small icon! Is it in the current working directory?", "Error", MB_OK | MB_ICONERROR);
-			}
-		}
-		break;
-		case WM_COMMAND:
-
-            // file
-			switch(LOWORD(wParam))
-			{
-				case TOP_10:
-					MessageBox(hwnd, "TOP 10 List!", "Woo!", MB_OK);break;
-			}
-
-
-            // Mode
-			switch(LOWORD(wParam))
-			{
-				case MODE_1:
-					MessageBox(hwnd, "Player VS Player", "SURE!", MB_OK);break;
-                case MODE_2:
-					MessageBox(hwnd, "Player VS Computer", "SURE!", MB_OK);break;
-			}
-
-
-            // Difficulty
-			switch(LOWORD(wParam))
-			{
-				case BEGINNER:
-					MessageBox(hwnd, "Beginner (2 X 2) Boxes", "SURE!", MB_OK);system("cls");game('b');break;
-                case EXPERT:
-					MessageBox(hwnd, "Expert (5 X 5) Boxes", "SURE!", MB_OK);system("cls");game('e');break;
-                case CHOOSE_DIFFICULTY:
-					MessageBox(hwnd, "Choose Grid (n X m) Boxs", "SURE!", MB_OK);system("cls");game('c');break;
-                case VSPLAYER:
-					MessageBox(hwnd, "You Are 2 Players!", "SURE!", MB_OK);system("cls");break;
-                case VSCOMPUTER:
-					MessageBox(hwnd, "You Are Playing Against Computer!", "SURE!", MB_OK);system("cls");break;
-			}
-
-
-			// Exit
-			switch(LOWORD(wParam))
-			{
-				case EXIT:
-					PostMessage(hwnd, WM_CLOSE, 0, 0);break;
-			}
-
-
-		break;
-		case WM_CLOSE:
-			DestroyWindow(hwnd);
-		break;
-		case WM_DESTROY:
-			PostQuitMessage(0);
-		break;
-		default:
-			return DefWindowProc(hwnd, Message, wParam, lParam);
-	}
-	// navigation bar ----------------------------------------------------------------------
-
-
-
-	//---------------------TEXT------------------------------------
-
-
-
-                    static wchar_t *lyrics =  L"     Dots and Boxes \nWelcome to the game!";
-					CreateWindowW(L"Static", lyrics,
-                                    WS_CHILD | WS_VISIBLE | SS_LEFT,
-                                    165, 40, 300, 230,
-                                    hwnd, (HMENU) 1, NULL, NULL);
-
-        /*
-
-            static wchar_t *lyrics =  L"     Dots and Boxes \nWelcome to the game !";
-
-            switch(Message) {
-
-                case WM_CREATE:
-
-                    CreateWindowW(L"Static", lyrics,
-                        WS_CHILD | WS_VISIBLE | SS_LEFT,
-                        165, 40, 300, 230,
-                        hwnd, (HMENU) 1, NULL, NULL);
-                    break;
-
-                case WM_DESTROY:
-
-                    PostQuitMessage(0);
-                    break;
-            }*/
-
-   // return DefWindowProcW(hwnd, Message, wParam, lParam);
-    // only one return at the end of all objects added
-
-
-
-
-
-	//---------------------TEXT---------------------
-
-
-
-	//-------------------Buttons-----------------------------
-
-
-
-
-
-	switch(Message) {
-
-        case WM_CREATE:
-
-            CreateWindowW(L"Button", L"Beginner",
-                WS_VISIBLE | WS_CHILD ,
-                60, 100, 110, 30, hwnd, (HMENU) BEGINNER, NULL, NULL);
-                //x, y, width, height
-            CreateWindowW(L"Button", L"Expert",
-                WS_VISIBLE | WS_CHILD ,
-                180, 100, 110, 30, hwnd, (HMENU) EXPERT, NULL, NULL);
-
-            CreateWindowW(L"Button", L"Choose Grid",
-                WS_VISIBLE | WS_CHILD ,
-                300, 100, 110, 30, hwnd, (HMENU) CHOOSE_DIFFICULTY, NULL, NULL);
-
-            CreateWindowW(L"Button", L"Player VS Player",
-                WS_VISIBLE | WS_CHILD ,
-                70, 160, 150, 30, hwnd, (HMENU) VSPLAYER, NULL, NULL);
-
-            CreateWindowW(L"Button", L"Player VS Computer",
-                WS_VISIBLE | WS_CHILD ,
-                250, 160, 150, 30, hwnd, (HMENU) VSCOMPUTER, NULL, NULL);
-
-            CreateWindowW(L"Button", L"EXIT GAME",
-                WS_VISIBLE | WS_CHILD ,
-                80, 220, 310, 30, hwnd, (HMENU) EXIT, NULL, NULL);
-            break;
-    }
-
-    return DefWindowProcW(hwnd, Message, wParam, lParam);
-
-
-
-
-
-	//---------------------Button--------------------------
-
-
-
-
-	//------------------------- Dropbox----------------------------------------
-
-
-
-
-
-/*
-static HWND hwndCombo, hwndStatic;
-    const wchar_t *items[] = { L"FreeBSD", L"OpenBSD",
-        L"NetBSD", L"Solaris", L"Arch" };
-
-    switch(Message) {
-
-        case WM_CREATE:
-
-              hwndCombo = CreateWindowW(L"Combobox", NULL,
-                    WS_CHILD | WS_VISIBLE | CBS_DROPDOWN,
-                    10, 10, 120, 110, hwnd, NULL, g_hinst, NULL);
-
-              CreateWindowW(L"Button", L"Drop down",
-                    WS_CHILD | WS_VISIBLE,
-                    150, 10, 90, 25, hwnd, (HMENU) 1, g_hinst, NULL);
-
-              hwndStatic = CreateWindowW(L"Static", L"",
-                    WS_CHILD | WS_VISIBLE,
-                    150, 80, 90, 25, hwnd, NULL, g_hinst, NULL);
-
-              for (int i = 0; i < 4; i++ ) {
-
-                  SendMessageW(hwndCombo, CB_ADDSTRING, 0, (LPARAM) items[i]);
-              }
-
-              break;
-
-        case WM_COMMAND:
-
-             if (HIWORD(wParam) == BN_CLICKED) {
-
-                  SendMessage(hwndCombo, CB_SHOWDROPDOWN, (WPARAM) TRUE, 0);
-             }
-
-             if (HIWORD(wParam) == CBN_SELCHANGE) {
-
-                  LRESULT sel = SendMessage(hwndCombo, CB_GETCURSEL, 0, 0);
-                  SetWindowTextW(hwndStatic, items[sel]);
-             }
-             break;
-
-    }
-
-    return DefWindowProcW(hwnd, Message, wParam, lParam);
-
-*/
-
-
-
-
-
-
-	//------------------------------Dropbox-----------------------------
-
-
-	return 0;
+int random_number(int min, int max){
+    int random = (rand() % (max - min + 1)) + min;
+    return random;
 }
 
+int vs_computer(char x) {
 
+  system("");//for enabling colors
+  srand(time(0));
 
+  int n, m;
 
+    switch(x){
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
-	LPSTR lpCmdLine, int nCmdShow)
-{
-	/*WNDCLASSEX wc;
-	HWND hwnd;
-	MSG Msg;
+      case 'b':n = 2; m = 2;break;  // Beginners get 2 X 2 grid
+      case 'B':n = 2; m = 2;break;  // Beginners get 2 X 2 grid
 
-	wc.cbSize		 = sizeof(WNDCLASSEX);
-	wc.style		 = 0;
-	wc.lpfnWndProc	 = WndProc;
-	wc.cbClsExtra	 = 0;
-	wc.cbWndExtra	 = 0;
-	wc.hInstance	 = hInstance;
-	wc.hIcon		 = NULL;
-	wc.hCursor		 = LoadCursor(NULL, IDC_ARROW);
-	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW+1);
-	wc.lpszMenuName  = NULL;
-	wc.lpszClassName = g_szClassName;
-	wc.hIconSm		 = NULL;
+      case 'e':n = 5; m = 5;break;  // Experts get 5 X 5 grid
+      case 'E':n = 5; m = 5;break;  // Experts get 5 X 5 grid
 
-	if(!RegisterClassEx(&wc))
-	{
-		MessageBox(NULL, "Window Registration Failed!", "Error!",
-			MB_ICONEXCLAMATION | MB_OK);
-		return 0;
-	}
+      case 'c':
+        printf( cyan "\n\n  Grid is n X m boxes\n");
+        printf("  n: " reset);scanf("%d", &n);
+        while(n > 8 || n < 1){printf(red "  Invalid Number, Enter number from 1 to 8\n  " reset);scanf("%d", &n);}
+        printf(cyan "  m: "reset);scanf("%d", &m);
+        while(m > 8 || m < 1){printf(red "  Invalid Number, Enter number from 1 to 8\n  " reset);scanf("%d", &m);}
+        system("cls");break;
+      case 'C':
+        printf( cyan "\n\n  Grid is n X m boxes\n");
+        printf("  n: " reset);scanf("%d", &n);
+        while(n > 8 || n < 1){printf(red "  Invalid Number, Enter number from 1 to 8\n  " reset);scanf("%d", &n);}
+        printf(cyan "  m: "reset);scanf("%d", &m);
+        while(m > 8 || m < 1){printf(red "  Invalid Number, Enter number from 1 to 8\n  " reset);scanf("%d", &m);}
+        system("cls");break;
 
-	hwnd = CreateWindowEx(
-		WS_EX_CLIENTEDGE,
-		g_szClassName,
-		"Dots and Boxes",
-		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, CW_USEDEFAULT, 900, 400,
-		NULL, NULL, hInstance, NULL);
+  }
 
-	if(hwnd == NULL)
-	{
-		MessageBox(NULL, "Window Creation Failed!", "Error!",
-			MB_ICONEXCLAMATION | MB_OK);
-		return 0;
-	}
+    char grid[2*n+1][2*m+1];
+    int colorsgrid[2*n+1][2*m+1];
 
-	ShowWindow(hwnd, nCmdShow);
-	UpdateWindow(hwnd);
+  // guarantee that all grid elements are empty
+    for(int i = 0; i < 2*n+1; i++){
 
-	while(GetMessage(&Msg, NULL, 0, 0) > 0)
-	{
-		TranslateMessage(&Msg);
-		DispatchMessage(&Msg);
-	}
-	return Msg.wParam;*/
+        for(int j = 0; j < 2*m+1; j++){
 
+            grid[i][j] = ' ';
+            colorsgrid[i][j] = FOREGROUND_WHITE ;
 
-
-
-
-
-    MSG  msg;
-    WNDCLASSW wc = {0};
-    wc.lpszClassName = L"Buttons";
-    wc.hInstance     = hInstance;
-    wc.hbrBackground = GetSysColorBrush(COLOR_3DFACE);
-    wc.lpfnWndProc   = WndProcc;
-    wc.hCursor       = LoadCursor(0, IDC_ARROW);
-
-    g_hinst = hInstance;
-
-    RegisterClassW(&wc);
-    CreateWindowW(wc.lpszClassName, L"DOTS and BOXES",
-                  WS_OVERLAPPEDWINDOW | WS_VISIBLE,
-                  600, 250, 500, 400, 0, 0, hInstance, 0);
-
-    //while (GetMessage(&msg, NULL, 0, 0)) {
-
-        //DispatchMessage(&msg);
-    //}
-
-    //return (int) msg.wParam;
-
-
-    while (GetMessage(&msg, NULL, 0, 0)) {
-
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
+        }
     }
 
-    return (int) msg.wParam;
+
+    // making the grid
+    for(int i =0;i < 2*n+1; i++){
+
+        if(i%2 == 0){
+            for(int j = 0; j < 2*m+1; j+=2){
+                grid[i][j] = 254;
+            }
+            for(int j = 1; j < 2*m+1; j+=2){
+                grid[i][j] = ' ';
+            }
+        }
+
+        else {
+          for(int j = 0; j < 2*m+1; j+=2){
+                grid[i][j] = ' ';
+            }
+        }
+
+    }
+
+
+  // --------------------------------------- starting the game -----------------------
+
+  //whenever maxmoves is reached game is over
+  int maxmoves =  m*(n+1) + n*(m+1);
+
+  static struct players playersInfo[2];
+  struct line lineD;
+
+  int scores[2] = {0, 0}, boxClosed = 0;
+  int moves[2] = {}, totalmoves = moves[0] + moves[1];
+  int colors[2] = {9, 12}; // bright blue & bright red
+  int backcolors[2] = {Background_Light_Blue, Background_Light_Red}; // background colors in case player scored a box
+  int currentplaying = 0;
+  int row1 = 0, row2 = 0, col1 = 0, col2 = 0;
+  int row = 0, col = 0;
+  int chosenrows[maxmoves], chosencols[maxmoves];
+  int redorows[maxmoves], redocols[maxmoves], redocounter = 0;
+  int valid_choice = 0, withinlimits = 1, lineAvlbe = 1;
+
+
+  //----------------------Taking players Information----------------------------
+
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hOut, backcolors[0]);
+    printf("\n\n\t\t\t");
+    playersInfo[0] = getplayerinfo();
+    strcpy(playersInfo[1].name, "computer\n");
+    SetConsoleTextAttribute(hOut, FOREGROUND_WHITE); // resets the color
+
+    system("cls");
+
+//--------------------------printing grid for the first time------------------
+              // columns rank before the grid
+              printf("\n\n                                 ");
+              for(int j = 0; j < m+1; j++){printf(yellow "%d.    " reset, j+1);}
+              printf("\n\n");
+
+
+              for(int i = 0;i < 2*n+1; i++){
+                if(!(i%2))
+                printf(yellow "                          %d.    " reset, i/2+1);  // rows rank left to the grid
+
+                else
+                printf("                                ");
+                for(int j = 0; j < 2*m+1; j++){
+                    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE); // Gets the standard output handle
+                    SetConsoleTextAttribute(hOut, colorsgrid[i][j]); //The font is set to it's assigned color in my array colorsgrid
+
+                    printf(" %c ", grid[i][j]);
+                    SetConsoleTextAttribute(hOut, FOREGROUND_WHITE);
+                }
+
+                printf("\n");
+
+              }
+
+  printf("\n\n");
+  print_board(scores, moves, maxmoves);
+
+
+  while(maxmoves - moves[0] - moves[1]){
+    no_moves_to_undo:
+    no_moves_to_redo:
+
+    valid_choice = 0;boxClosed = 0;
+    totalmoves = moves[0] + moves[1];
+    printf(green "   Turn OF: " reset);
+
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hOut, colors[currentplaying%2]);
+    printf(" %s", playersInfo[currentplaying%2].name);
+    SetConsoleTextAttribute(hOut, FOREGROUND_WHITE);
+
+
+//------------------taking move from computer ---------------
+
+    if(currentplaying%2){
+
+        move_chosen:
+        row = random_number(1, 2*n);
+        col = random_number(1, 2*m);
+
+        while((row%2 && col%2) || (row%2==0 && col%2==0)){
+            row = random_number(1, 2*n);
+            col = random_number(1, 2*m);
+        }
+
+        for(int i = 0; i < totalmoves; i++){
+           if(chosenrows[i] == row && chosencols[i] == col)goto move_chosen;
+        }
+
+        chosenrows[totalmoves] = row;
+        chosencols[totalmoves] = col;
+
+        if(row%2){
+            grid[row][col] = 186;
+            colorsgrid[row][col] = colors[currentplaying%2];
+        }
+
+        else{
+            grid[row][col] = 205;
+            colorsgrid[row][col] = colors[currentplaying%2];
+        }
+
+        goto computer_turn;
+    }
+
+    //-------------------------taking move from player -------------------
+
+    else{
+        printf("row %d col %d", row, col);
+        lineD = getLine();
+
+        row1 = lineD.point1.row;
+        row2 = lineD.point2.row;
+
+        col1 = lineD.point1.col;
+        col2 = lineD.point2.col;
+    }
 
 
 
+    row = 0;col = 0; // only for painting the chosen line
 
 
+
+//----------------------------------- UNDO Function ----------------------------------------------
+
+    if(row1 == -1 || row2 == -1 || col1 == -1 || col2 == -1){
+
+        if(!totalmoves){
+            HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE); // Gets the standard output handle
+            SetConsoleTextAttribute(hOut, 4); // color is bright blue
+            printf("  No Previous Moves to UNDO :)\n");goto no_moves_to_undo;
+            SetConsoleTextAttribute(hOut, FOREGROUND_WHITE); // color is bright blue
+        }
+
+        else{
+            row = chosenrows[totalmoves-1];
+            col = chosencols[totalmoves-1];
+
+            chosenrows[totalmoves-1] = 0;
+            chosencols[totalmoves-1] = 0;
+
+            redorows[redocounter] = row;
+            redocols[redocounter] = col;
+            redocounter++;
+
+            //resetting the point
+            grid[row][col] = ' ';
+            colorsgrid[row][col] = FOREGROUND_WHITE ;
+
+            // ---------resetting any closed box ------------
+            int undoclosedbox = 0;
+            // if it's vertical line
+            if(row%2){
+                    if(grid[row][col+1] == 65 || grid[row][col+1] == 67){undoclosedbox = 1;scores[currentplaying%2]--;
+                    grid[row][col+1] = ' ';
+                    colorsgrid[row][col+1] = FOREGROUND_WHITE ;}
+
+                    if(grid[row][col-1] == 65 || grid[row][col-1] == 67){undoclosedbox = 1;scores[currentplaying%2]--;
+                    grid[row][col-1] = ' ';
+                    colorsgrid[row][col-1] = FOREGROUND_WHITE ;}
+            }
+
+            // if it's horizontal line
+            else{
+                if(grid[row+1][col] == 65 || grid[row+1][col] == 67){undoclosedbox = 1;scores[currentplaying%2]--;
+                grid[row+1][col] = ' ';
+                colorsgrid[row+1][col] = FOREGROUND_WHITE ;}
+
+                if(grid[row-1][col] == 65 || grid[row-1][col] == 67){undoclosedbox = 1;scores[currentplaying%2]--;
+                grid[row-1][col] = ' ';
+                colorsgrid[row-1][col] = FOREGROUND_WHITE ;}
+            }
+
+            if(undoclosedbox){currentplaying++;undoclosedbox = 0;}
+
+            currentplaying++;
+            moves[currentplaying%2]--;
+
+            goto undo;
+        }
+    }
+
+
+//----------------------------------- REDO Function ----------------------------------------------
+    if(row1 == -2 || row2 == -2 || col1 == -2 || col2 == -2){
+
+        if(!redocounter){
+            HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE); // Gets the standard output handle
+            SetConsoleTextAttribute(hOut, 4); // color is bright blue
+            printf("  No Further Moves to REDO :)\n");goto no_moves_to_redo;
+            SetConsoleTextAttribute(hOut, FOREGROUND_WHITE); // color is bright blue
+        }
+
+        else{
+
+            row = redorows[redocounter-1];
+            col = redocols[redocounter-1];
+            if(redocounter)redocounter--;
+
+            chosenrows[totalmoves] = row;
+            chosencols[totalmoves] = col;
+
+            if(row%2){
+                grid[row][col] = 186;
+                colorsgrid[row][col] = colors[currentplaying%2];
+            }
+
+            else{
+                grid[row][col] = 205;
+                colorsgrid[row][col] = colors[currentplaying%2];
+            }
+
+            goto redo;
+
+        }
+
+
+    }
+
+//----------------------------------End of UNDO & REDO ----------------------------------
+
+
+
+    // resetting the redo array in case they enter a move
+    for(int i = 0; i < maxmoves; i++){redorows[i] = 0;redocols[i] = 0;redocounter = 0;}
+
+
+    // changing the right point on grid
+    // if it's horizontal line
+    if(col1 < col2){row = 2*row1-2, col = 2*col1-1;}
+    else if(col1 > col2){row = 2*row1-2, col = 2*col2-1;}
+
+    // if it's vertical line
+    if(row1 < row2){row = 2*row1-1, col = 2*col1-2;}
+    else if(row1 > row2){row = 2*row2-1, col = 2*col1-2;}
+
+
+    int rowdiff = abs(row1 - row2);
+    int coldiff = abs(col1 - col2);
+
+    // check if the line is within limits of my grid
+    if( (row1 > n+1) || (row2 > n+1) || (col1 > m+1) || (col2 > m+1) )withinlimits = 0; // if beyond limits number
+    if( (row1 < 1) || (row2 < 1) || (col1 < 1) || (col2 < 1) )withinlimits = 0; // if -ve number
+
+
+    if((rowdiff==1 && !coldiff && withinlimits) || (coldiff==1 && !rowdiff && withinlimits)){
+
+        //----need to make sure these points have NOT been chosen before---------------
+        // is line chosen ?
+        for(int i = 0; i < totalmoves; i++){
+           if(chosenrows[i] == row && chosencols[i] == col){lineAvlbe = 0;break;}
+        }
+
+        if(!lineAvlbe){
+            printf(red "  Line Already Chosen, looks like you are not paying attention to the board :(\n" reset);lineAvlbe = 1;}
+
+        else {valid_choice = 1;chosenrows[totalmoves] = row;chosencols[totalmoves] = col;}
+
+    }
+
+    else if(!withinlimits) {
+        printf(red "  Invalid Points, the points are beyond limits :)\n" reset);withinlimits = 1;
+    }
+    else{
+        printf(red "  Invalid Points, you should enter adjacent points :)\n" reset);
+    }
+
+
+    if(valid_choice){
+
+        // changing the right point on grid
+        // if it's horizontal line
+        if(row1 == row2){
+                grid[row][col] = 205;
+                colorsgrid[row][col] = colors[currentplaying%2];}
+        // if it's vertical line
+        if(col1 == col2){
+                grid[row][col] = 186;
+                colorsgrid[row][col] = colors[currentplaying%2];}
+
+        //------------------------------ is it a box ?-----------------------------------
+        redo:
+        computer_turn:
+        if(row % 2 == 0){ //if it's row
+            if(!row){ //if it's not top row nor bottom row
+
+                if(grid[row+2][col] != 32 && grid[row+1][col-1] != 32 && grid[row+1][col+1] != 32)
+                        {grid[row+1][col] = (currentplaying%2)*2+65;colorsgrid[row+1][col] = backcolors[currentplaying%2];boxClosed = 1;scores[currentplaying%2]++;}
+
+            }
+
+            else if(row == 2*n){ // if it's top row , check only the box under it
+
+                if(grid[row-2][col] != 32 && grid[row-1][col-1] != 32 && grid[row-1][col+1] != 32)
+                        {grid[row-1][col] = (currentplaying%2)*2+65;colorsgrid[row-1][col] = backcolors[currentplaying%2];boxClosed = 1;scores[currentplaying%2]++;}
+
+              }
+
+            else{ // if it's bottom row , check only the box above it
+
+                if(grid[row-2][col] != 32 && grid[row-1][col-1] != 32 && grid[row-1][col+1] != 32)
+                        {grid[row-1][col] = (currentplaying%2)*2+65;colorsgrid[row-1][col] = backcolors[currentplaying%2];boxClosed = 1;scores[currentplaying%2]++;}
+
+                if(grid[row+2][col] != 32 && grid[row+1][col-1] != 32 && grid[row+1][col+1] != 32)
+                        {grid[row+1][col] = (currentplaying%2)*2+65;colorsgrid[row+1][col] = backcolors[currentplaying%2];boxClosed = 1;scores[currentplaying%2]++;}
+
+              }
+        }
+        //if it's column
+        if(row % 2 == 1){
+            if(!col){
+
+                if(grid[row][col+2] != 32 && grid[row-1][col+1] != 32 && grid[row+1][col+1] != 32)
+                        {grid[row][col+1] = (currentplaying%2)*2+65;colorsgrid[row][col+1] = backcolors[currentplaying%2];boxClosed = 1;scores[currentplaying%2]++;}
+
+            }
+
+            else if(col == 2*m){
+
+                if(grid[row][col-2] != 32 && grid[row-1][col-1] != 32 && grid[row+1][col-1] != 32)
+                        {grid[row][col-1] = (currentplaying%2)*2+65;colorsgrid[row][col-1] = backcolors[currentplaying%2];boxClosed = 1;scores[currentplaying%2]++;}
+
+            }
+
+            else {
+
+                if(grid[row][col-2] != 32 && grid[row-1][col-1] != 32 && grid[row+1][col-1] != 32)
+                        {grid[row][col-1] = (currentplaying%2)*2+65;colorsgrid[row][col-1] = backcolors[currentplaying%2];boxClosed = 1;scores[currentplaying%2]++;}
+
+                if(grid[row][col+2] != 32 && grid[row-1][col+1] != 32 && grid[row+1][col+1] != 32)
+                        {grid[row][col+1] = (currentplaying%2)*2+65;colorsgrid[row][col+1] = backcolors[currentplaying%2];boxClosed = 1;scores[currentplaying%2]++;}
+
+            }
+        }
+
+
+
+        moves[currentplaying%2]++;
+        totalmoves = moves[0] + moves[1]; // number of moves increase for the player 1 or 2
+        if(boxClosed){currentplaying--;}
+        currentplaying++;
+
+//--------------------------printing grid after each valid move------------------
+              // columns rank before the grid
+              undo:
+              system("cls");
+              printf("\n\n                                 ");
+              for(int j = 0; j < m+1; j++){printf(yellow "%d.    " reset, j+1);}
+              printf("\n\n");
+
+
+              for(int i = 0;i < 2*n+1; i++){
+                if(!(i%2))
+                printf(yellow "                          %d.    " reset, i/2+1);  // rows rank left to the grid
+
+                else
+                printf("                                ");
+                for(int j = 0; j < 2*m+1; j++){
+
+                    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE); // Gets the standard output handle
+                    SetConsoleTextAttribute(hOut, colorsgrid[i][j]); //The font is set to it's assigned color in my array colorsgrid
+
+                    printf(" %c ", grid[i][j]);
+                    SetConsoleTextAttribute(hOut, FOREGROUND_WHITE);
+
+                }
+
+                printf("\n");
+
+              }
+
+        printf("\n\n");
+        print_board(scores, moves, maxmoves);
+
+    }
+
+
+  }
+
+    playersInfo[0].score = scores[0];
+    playersInfo[1].score = scores[1];
+
+  if(scores[0] > scores[1]){
+        printf("\t\t\tCongratulations, ");
+        SetConsoleTextAttribute(hOut, colors[0]);
+        printf("%s\t\t\t You are the WINNER !", playersInfo[0].name);}
+
+
+  else if(scores[0] < scores[1]){
+        printf("\t\t\t    Unfortunately, ");
+        SetConsoleTextAttribute(hOut, colors[1]);
+        printf("%s\t\t\t The Computer is the WINNNER !", playersInfo[0].name);}
+
+  else printf(cyan "\t\t\tNo Winners Today \n\t\t\t  It's a TIE !" reset);
+
+  SetConsoleTextAttribute(hOut, FOREGROUND_WHITE);
+
+  return 0;
 
 }

@@ -1,9 +1,9 @@
-#ifndef VS_COMPUTER_H_INCLUDED
-#define VS_COMPUTER_H_INCLUDED
+#ifndef VS_COMPUTER_INCLUDED
+#define VS_COMPUTER_INCLUDED
+
+#include "VS computer.c"
+
+#endif // VS_COMPUTER_INCLUDED
 
 
-
-HINSTANCE g_hinst;
-LRESULT CALLBACK WndProcc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam);
-
-#endif // VS_COMPUTER_H_INCLUDED
+int vs_computer(char x);
