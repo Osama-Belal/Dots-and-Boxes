@@ -92,7 +92,6 @@ struct players{
 struct players getplayerinfo(){
 
   struct players player;
-
   printf("Player Name: ");
   fgets(player.name, 30, stdin);
 
