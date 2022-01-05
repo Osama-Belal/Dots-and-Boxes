@@ -4,6 +4,7 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
+#include "top_10.h"
 #include "playing.h"
 
 int random_number(int min, int max){
@@ -158,13 +159,20 @@ int vs_computer(char x) {
     if(currentplaying%2){
 
         move_chosen:
-        row = random_number(1, 2*n);
-        col = random_number(1, 2*m);
+                                                                                /*row = random_number(1, 2*n);
 
-        while((row%2 && col%2) || (row%2==0 && col%2==0)){
-            row = random_number(1, 2*n);
-            col = random_number(1, 2*m);
+                                                                                col = random_number(1, 2*m);
+
+                                                                                while((row%2 && col%2) || (row%2==0 && col%2==0)){
+                                                                                    row = random_number(1, 2*n);
+                                                                                    col = random_number(1, 2*m);
+                                                                                }*/
+        for(int i = 1; i < 2*m+1; i+=2){
+            if(grid[1][i-1] != 32 && grid[1][i+1] != 32 && grid[2][i] != 32){row = 0;col = i;break}
+            if(grid[2*n-1][i-1] != 32 && grid[2*n-1][i+1] != 32 && grid[2*n-2][i] != 32){row = 2*n;col = i;break}
         }
+
+
 
         for(int i = 0; i < totalmoves; i++){
            if(chosenrows[i] == row && chosencols[i] == col)goto move_chosen;
