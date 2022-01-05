@@ -156,24 +156,82 @@ int vs_computer(char x) {
 
 //------------------taking move from computer ---------------
 
+/*
+    row = random_number(1, 2*n);
+    col = random_number(1, 2*m);
+
+    while((row%2 && col%2) || (row%2==0 && col%2==0)){
+        row = random_number(1, 2*n);
+        col = random_number(1, 2*m);
+    }*/
+
     if(currentplaying%2){
 
         move_chosen:
-                                                                                /*row = random_number(1, 2*n);
 
-                                                                                col = random_number(1, 2*m);
-
-                                                                                while((row%2 && col%2) || (row%2==0 && col%2==0)){
-                                                                                    row = random_number(1, 2*n);
-                                                                                    col = random_number(1, 2*m);
-                                                                                }*/
-        for(int i = 1; i < 2*m+1; i+=2){
-            if(grid[1][i-1] != 32 && grid[1][i+1] != 32 && grid[2][i] != 32){row = 0;col = i;break}
-            if(grid[2*n-1][i-1] != 32 && grid[2*n-1][i+1] != 32 && grid[2*n-2][i] != 32){row = 2*n;col = i;break}
+        //----------------------------------------- Almost Closed Box ----------------------------------------------
+/*
+        for(int i = 1; i < 2*m; i+=2){
+            if(grid[1][i-1] != 32 && grid[1][i+1] != 32 && grid[2][i] != 32){row = 0;col = i;goto chosen;}
+            if(grid[2*n-1][i-1] != 32 && grid[2*n-1][i+1] != 32 && grid[2*n-2][i] != 32){row = 2*n;col = i;goto chosen;}
         }
 
+        for(int i = 2; i <= 2*n-2; i=+2){
+            for(int j = 1; j <= 2*m-1; j=+2){
+                if((grid[i-1][j-1] != 32 && grid[i-1][j+1] != 32 && grid[i-2][j] != 32) ||
+                  (grid[i+1][j-1] != 32 && grid[i+1][j+1] != 32 && grid[i+2][j] != 32)){row = i;col = j;goto chosen;}
+            }
+        }
 
+        for(int i = 1; i < 2*n; i+=2){
+            if(grid[i-1][1] != 32 && grid[i+1][1] != 32 && grid[i][2] != 32){row = i;col = 0;goto chosen;}
+            if(grid[i-1][2*m-1] != 32 && grid[i+1][2*m-1] != 32 && grid[i][2*m-2] != 32){row = i;col = 2*m;goto chosen;}
+        }
 
+        for(int i = 2; i <= 2*m-2; i=+2){
+            for(int j = 1; j <= 2*n-1; j=+2){
+                if( (grid[j-1][i-1] != 32 && grid[j+1][i-1] != 32 && grid[j][i-2] != 32) ||
+                  (grid[j-1][i+1] != 32 && grid[j+1][i+1] != 32 && grid[j][i+2] != 32) ){row = j;col = i;goto chosen;}
+            }
+        }
+
+        //----------------------------------------- Empty Box ----------------------------------------------
+
+        for(int i = 1; i < 2*m; i+=2){
+            if(grid[1][i-1] == 32 && grid[1][i+1] == 32 && grid[2][i] == 32){printf("2");row = 0;col = i;goto chosen;}
+            if(grid[2*n-1][i-1] == 32 && grid[2*n-1][i+1] == 32 && grid[2*n-2][i] == 32){printf("1");row = 2*n;col = i;goto chosen;}
+        }
+
+        for(int i = 2; i <= 2*n-2; i=+2){
+            for(int j = 1; j <= 2*m-1; j=+2){
+                if( (grid[i-1][j-1] == 32 && grid[i-1][j+1] == 32 && grid[i-2][j] == 32) ||
+                  (grid[i+1][j-1] == 32 && grid[i+1][j+1] == 32 && grid[i+2][j] == 32) ){printf("9");row = i;col = j;goto chosen;}
+            }
+        }
+
+        for(int i = 1; i < 2*n; i+=2){
+            if(grid[i-1][1] == 32 && grid[i+1][1] == 32 && grid[i][2] == 32){printf("7");row = i;col = 0;goto chosen;}
+            if(grid[i-1][2*m-1] == 32 && grid[i+1][2*m-1] == 32 && grid[i][2*m-2] == 32){printf("6");row = i;col = 2*m;goto chosen;}
+        }
+
+        for(int i = 2; i <= 2*m-2; i=+2){
+            for(int j = 1; j <= 2*n-1; j=+2){
+                if( (grid[j-1][i-1] == 32 && grid[j+1][i-1] == 32 && grid[j][i-2] == 32) ||
+                  (grid[j-1][i+1] == 32 && grid[j+1][i+1] == 32 && grid[j][i+2] == 32) ){printf("5");row = j;col = i;goto chosen;}
+            }
+        }
+*/
+        //------------------------------------- Pick Random Then -------------------------------------------------------
+
+        row = random_number(1, 2*n);
+        col = random_number(1, 2*m);
+
+        while((row%2 && col%2) || (row%2==0 && col%2==0)){
+            row = random_number(1, 2*n);
+            col = random_number(1, 2*m);
+        }
+
+        chosen:
         for(int i = 0; i < totalmoves; i++){
            if(chosenrows[i] == row && chosencols[i] == col)goto move_chosen;
         }
