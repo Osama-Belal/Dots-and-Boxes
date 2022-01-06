@@ -6,4 +6,5 @@
 #endif // PLAYING_H_INCLUDED
 
 
+void print_board(int scores[], int moves[], int maxmoves);
 int game(char  x);

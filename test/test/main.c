@@ -4,6 +4,7 @@
 #include "playing.h"
 #include "top_10.h"
 #include "VS computer.h"
+//#include "save, load.h"
 
 #define  reset "\x1b[0m"
 
@@ -29,6 +30,8 @@
 #define CHOOSE_DIFFICULTY 9007
 #define START 9008
 #define MAINMENU 9009
+
+
 
 HWND start_button, text, guide_text, computer_button, player_button, exit_button, guide_button, top10_button;
 HWND b_button, e_button, c_button, return_button;

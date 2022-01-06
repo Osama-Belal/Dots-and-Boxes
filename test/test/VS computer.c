@@ -6,6 +6,7 @@
 #include <math.h>
 #include "top_10.h"
 #include "playing.h"
+//#include "save, load.h"
 
 int random_number(int min, int max){
     int random = (rand() % (max - min + 1)) + min;
@@ -85,7 +86,7 @@ int vs_computer(char x) {
   //whenever maxmoves is reached game is over
   int maxmoves =  m*(n+1) + n*(m+1);
 
-  static struct players playersInfo[2];
+  static players playersInfo[2];
   struct line lineD;
 
   int scores[2] = {0, 0}, boxClosed = 0;
@@ -231,7 +232,7 @@ int vs_computer(char x) {
             col = random_number(1, 2*m);
         }
 
-        chosen:
+        //chosen:
         for(int i = 0; i < totalmoves; i++){
            if(chosenrows[i] == row && chosencols[i] == col)goto move_chosen;
         }
@@ -268,6 +269,16 @@ int vs_computer(char x) {
 
 
     row = 0;col = 0; // only for painting the chosen line
+
+
+//---------------------------------------------- Save ---------------------------------------------------------
+
+
+    if (row1 == -5 || row2 == -5 || col1 == -5 || col2 == -5){save(1, playersInfo, scores, moves, maxmoves, chosenrows, chosencols);goto undo;}
+
+    else if(row1 == -6 || row2 == -6 || col1 == -6 || col2 == -6){save(2, playersInfo, scores, moves, maxmoves, chosenrows, chosencols);goto undo;}
+
+    else if(row1 == -7 || row2 == -7 || col1 == -7 || col2 == -7){save(3, playersInfo, scores, moves, maxmoves, chosenrows, chosencols);goto undo;}
 
 
 

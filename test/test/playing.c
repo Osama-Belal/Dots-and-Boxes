@@ -4,6 +4,7 @@
 #include <string.h>
 #include <math.h>
 #include "top_10.h"
+//#include "save, load.h"
 
 #define  reset "\x1b[0m"
 
@@ -50,25 +51,33 @@ void printgrid(int n, int m){
 }
 */
 
+
+ typedef struct players{
+    char name[30];
+    int color;
+    int score;
+}players;
+
 void print_board(int scores[], int moves[], int maxmoves){
 
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE); // Gets the standard output handle
 
     SetConsoleTextAttribute(hOut, 9); // color is bright blue
-    printf("    Player 1 score: %d                     ", scores[0]);
+    printf("    Player 1's score: %d                     ", scores[0]);
     SetConsoleTextAttribute(hOut, 12); // color is bright red
-    printf("    Player 2 score: %d\n", scores[1]);
+    printf("    Player 2's score: %d\n", scores[1]);
 
     SetConsoleTextAttribute(hOut, 9);  // color is bright blue
-    printf("    Player 1 moves: %d                     ", moves[0]);
+    printf("    Player 1's moves: %d                     ", moves[0]);
     SetConsoleTextAttribute(hOut, 12);  // color is bright red
-    printf("    Player 2 moves: %d\n\n", moves[1]);
+    printf("    Player 2's moves: %d\n\n", moves[1]);
 
     printf("                     ");
     SetConsoleTextAttribute(hOut, 14);  // color is bright yellow
     printf("    Remaining moves: %d\n", maxmoves - moves[0] - moves[1]);
 
-    printf("    Enter (-1) to UNDO,  (-2) to REDO \n    And remember, you need to UNDO First to REDO Back :)");
+    printf("    Enter (a) to SAVE in file 1,  (b) to SAVE in file 2 OR (c) to SAVE in file 3\n");
+    printf("    Enter (u) to UNDO,  (r) to REDO \n    And remember, you need to UNDO First to REDO Back :)");
 
     SetConsoleTextAttribute(hOut, FOREGROUND_WHITE); // resets the color
 
@@ -81,22 +90,16 @@ void backgroundyellow(){
 }
 
 
-struct players{
-    char name[30];
-    int color;
-    int score;
-};
-
-
 // function returns struct
-struct players getplayerinfo(){
+ players getplayerinfo(){
 
-  struct players player;
+  players player;
 
   printf("Player Name: ");
   fgets(player.name, 30, stdin);
   while(player.name[0] < 'A' || player.name[0] > 'z'){
     if(player.name[0] != '\n')printf(reset red "   Enter Valid Name" reset);
+    //fgets(player.name, 30, stdin);
     fgets(player.name, 30, stdin);
   }
 
@@ -120,23 +123,112 @@ struct line{
 struct line getLine(){
 
   struct line lineG;
+  char in1[30], in2[30], in3[30], in4[30];
 
+  enter_again:
   printf(green "  ROW: ");
-  scanf ("%d", &lineG.point1.row);
+  fgets(in1, 30, stdin);
 
   printf("  ROW: ");
-  scanf ("%d", &lineG.point2.row);
+  fgets(in2, 30, stdin);
 
   printf("  COL: ");
-  scanf("%d", &lineG.point1.col);
+  fgets(in3, 30, stdin);
 
   printf("  COL: ");
-  scanf("%d" reset, &lineG.point2.col);
+  fgets(in4, 30, stdin);
+
+  if(in1[1] != '\n' || in2[1] != '\n' || in3[1] != '\n' || in4[1] != '\n'){printf(red "    Enter Valid Input\n" reset);goto enter_again;}
+
+  switch(in1[0]){
+   case '1':lineG.point1.row = 1;break;case '2':lineG.point1.row = 2;break;case '3':lineG.point1.row = 3;break;
+   case '4':lineG.point1.row = 4;break;case '5':lineG.point1.row = 5;break;case '6':lineG.point1.row = 6;break;
+   case '7':lineG.point1.row = 7;break;case '8':lineG.point1.row = 8;break;case '9':lineG.point1.row = 9;break;
+
+   case 'u':lineG.point1.row = -1;break;case 'r':lineG.point1.row = -2;break;
+   case 'U':lineG.point1.row = -1;break;case 'R':lineG.point1.row = -2;break;
+    case 'a':lineG.point1.row = -5;break;case 'b':lineG.point1.row = -6;break;case 'c':lineG.point1.row = -7;break;
+    case 'A':lineG.point1.row = -5;break;case 'B':lineG.point1.row = -6;break;case 'C':lineG.point1.row = -7;break;
+
+   default : printf(red "    Enter Valid Input\n" reset);goto enter_again;break;
+  }
+  switch(in3[0]){
+   case '1':lineG.point1.col = 1;break;case '2':lineG.point1.col = 2;break;case '3':lineG.point1.col = 3;break;
+   case '4':lineG.point1.col = 4;break;case '5':lineG.point1.col = 5;break;case '6':lineG.point1.col = 6;break;
+   case '7':lineG.point1.col = 7;break;case '8':lineG.point1.col = 8;break;case '9':lineG.point1.col = 9;break;
+
+   case 'u':lineG.point1.col = -1;break;case 'r':lineG.point1.col = -2;break;
+   case 'U':lineG.point1.col = -1;break;case 'R':lineG.point1.col = -2;break;
+    case 'a':lineG.point1.col = -5;break;case 'b':lineG.point1.col = -6;break;case 'c':lineG.point1.col = -7;break;
+    case 'A':lineG.point1.col = -5;break;case 'B':lineG.point1.col = -6;break;case 'C':lineG.point1.col = -7;break;
+
+   default : printf(red "    Enter Valid Input\n" reset);goto enter_again;break;
+  }
+  switch(in2[0]){
+   case '1':lineG.point2.row = 1;break;case '2':lineG.point2.row = 2;break;case '3':lineG.point2.row = 3;break;
+   case '4':lineG.point2.row = 4;break;case '5':lineG.point2.row = 5;break;case '6':lineG.point2.row = 6;break;
+   case '7':lineG.point2.row = 7;break;case '8':lineG.point2.row = 8;break;case '9':lineG.point2.row = 9;break;
+
+   case 'u':lineG.point2.row = -1;break;case 'r':lineG.point2.row = -2;break;
+   case 'U':lineG.point2.row = -1;break;case 'R':lineG.point2.row = -2;break;
+    case 'a':lineG.point2.row = -5;break;case 'b':lineG.point2.row = -6;break;case 'c':lineG.point2.row = -7;break;
+    case 'A':lineG.point2.row = -5;break;case 'B':lineG.point2.row = -6;break;case 'C':lineG.point2.row = -7;break;
+
+   default : printf(red "    Enter Valid Input\n" reset);goto enter_again;break;
+  }
+  switch(in4[0]){
+   case '1':lineG.point2.col = 1;break;case '2':lineG.point2.col = 2;break;case '3':lineG.point2.col = 3;break;
+   case '4':lineG.point2.col = 4;break;case '5':lineG.point2.col = 5;break;case '6':lineG.point2.col = 6;break;
+   case '7':lineG.point2.col = 7;break;case '8':lineG.point2.col = 8;break;case '9':lineG.point2.col = 9;break;
+
+   case 'u':lineG.point2.col = -1;break;case 'r':lineG.point2.col = -2;break;
+   case 'U':lineG.point2.col = -1;break;case 'R':lineG.point2.col = -2;break;
+    case 'a':lineG.point2.col = -5;break;case 'b':lineG.point2.col = -6;break;case 'c':lineG.point2.col = -7;break;
+    case 'A':lineG.point2.col = -5;break;case 'B':lineG.point2.col = -6;break;case 'C':lineG.point2.col = -7;break;
+
+   default : printf(red "    Enter Valid Input\n" reset);goto enter_again;break;
+  }
+
 
   return lineG;
 }
 
 
+
+void save(int x, struct players playersInfo[], int scores[], int moves[], int maxmoves, int chosenrows[], int chosencols[]){
+
+    FILE *fp;
+    char* file_name;
+    if(x == 1){file_name = "save_file_1.text";}
+    if(x == 2){file_name = "save_file_2.text";}
+    if(x == 3){file_name = "save_file_3.text";}
+
+    fp = fopen(file_name, "w");
+    printf("SAVING..........\n");
+
+    if (fp == NULL){printf("ERROR: can\'t open file\n");return;}
+
+    fprintf(fp, "%s's score = %d, %s's score = %d, \n%s's moves = %d, %s's moves = %d\n Remaining Moves = %d\n",
+      playersInfo[0].name, scores[0],
+      playersInfo[1].name, scores[1],
+      playersInfo[0].name, moves[0],
+      playersInfo[1].name, moves[1], maxmoves - moves[0] - moves[1]);
+
+    fprintf(fp, "Chosen Rows: \n");
+    for (int i = 0; i < moves[0] + moves[1]; i++){
+            fprintf(fp, " %d ", chosenrows[i]);
+    }
+
+    fprintf(fp, "\nChosen Columns: \n");
+    for (int i = 0; i < moves[0] + moves[1]; i++){
+            fprintf(fp, " %d ", chosencols[i]);
+    }
+
+    fclose(fp);
+
+    printf("\t\t\t File Saved in %s :)", file_name);
+    Sleep(3000);
+}
 
 
 
@@ -251,7 +343,7 @@ int game(char x) {
   //whenever maxmoves is reached game is over
   int maxmoves =  m*(n+1) + n*(m+1);
 
-  struct players playersInfo[2];
+  players playersInfo[2];
 
   int scores[2] = {0, 0}, boxClosed = 0;
   int moves[2] = {}, totalmoves = moves[0] + moves[1];
@@ -263,7 +355,7 @@ int game(char x) {
   int redorows[maxmoves], redocols[maxmoves], redocounter = 0;
   int valid_choice = 0, withinlimits = 1, lineAvlbe = 1;
 
-  static struct players top10[10];
+  static players top10[10];
 
 
   //----------------------Taking players Information----------------------------
@@ -344,6 +436,15 @@ int game(char x) {
     col2 = lineD.point2.col;
 
     int row = 0, col = 0; // only for painting the chosen line
+
+//---------------------------------------------- Save ---------------------------------------------------------
+
+
+    if (row1 == -5 || row2 == -5 || col1 == -5 || col2 == -5){save(1, playersInfo, scores, moves, maxmoves, chosenrows, chosencols);goto undo;}
+
+    else if(row1 == -6 || row2 == -6 || col1 == -6 || col2 == -6){save(2, playersInfo, scores, moves, maxmoves, chosenrows, chosencols);goto undo;}
+
+    else if(row1 == -7 || row2 == -7 || col1 == -7 || col2 == -7){save(3, playersInfo, scores, moves, maxmoves, chosenrows, chosencols);goto undo;}
 
 
 
